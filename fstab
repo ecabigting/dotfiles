@@ -1,0 +1,18 @@
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a device; this may
+# be used with UUID= as a more robust way to name devices that works even if
+# disks are added and removed. See fstab(5).
+#
+# <file system>             <mount point>  <type>  <options>  <dump>  <pass>
+UUID=6643-93A2                            /boot/efi      vfat    fmask=0137,dmask=0027 0 2
+UUID=655d8c79-1b84-4d5e-b54e-b8a98d7e151d /              ext4    noatime    0 1
+tmpfs                                     /tmp           tmpfs   defaults,noatime,mode=1777 0 0
+UUID=2E2ABE652ABE2A2B	/mnt/DataThree	ntfs	defaults,nofail,x-gvfs-show	0	0
+UUID=84AA1665AA1653D0	/mnt/DataOne	ntfs	defaults,nofail,x-gvfs-show	0	0
+UUID=72BE09F6BE09B39F	/mnt/DataTwo	ntfs	defaults,nofail,x-gvfs-show	0	0
+UUID=620644170643EA9D	/mnt/FilesSSD	ntfs	defaults,nofail,x-gvfs-show	0	0
+192.168.1.130:/volume1/dorneShared	/mnt/dorneShared	nfs	nofail,noauto,user,timeo=900,retrans=5,_netdev,x-gvfs-show	0 0
+192.168.1.130:/volume2/dorneMedia	/mnt/dorneMedia	nfs	nofail,noauto,user,timeo=900,retrans=5,_netdev,x-gvfs-show	0 0
+#//192.168.122.225/stifmiester	/mnt/iCloudDrive	cifs	_netdev,noauto,nofail,user,ver=2.0,username=,password=,gid=1000,uid=984,x-gvfs-show	0	0
+

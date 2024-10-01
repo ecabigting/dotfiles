@@ -1,0 +1,85 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "pixel",
+    "current_border_width": 1,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1037,
+       "width": 946,
+       "x": 2569,
+       "y": 9
+    },
+    "marks": [],
+    "name": "GNU Image Manipulation Program",
+    "percent": 0.5,
+    "swallows": [
+       {
+       // "class": "^Gimp\\-2\\.10$",
+       // "instance": "^gimp\\-2\\.10$",
+       // "machine": "^dornemaster\\-eos$",
+       // "title": "^GNU\\ Image\\ Manipulation\\ Program$",
+       // "window_role": "^gimp\\-image\\-window\\-1$"
+       }
+    ],
+    "type": "con"
+}
+
+{
+    // splitv split container with 2 children
+    "border": "pixel",
+    "floating": "auto_off",
+    "layout": "splitv",
+    "marks": [],
+    "percent": 0.5,
+    "type": "con",
+    "nodes": [
+        {
+            "border": "pixel",
+            "current_border_width": 1,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 830,
+               "width": 1900,
+               "x": 2570,
+               "y": 10
+            },
+            "marks": [],
+            "name": "Ed Sheeran - Galway Girl",
+            "percent": 0.9,
+            "swallows": [
+               {
+               // "class": "^Spotify$",
+               // "instance": "^spotify$",
+               // "machine": "^dornemaster\\-eos$",
+               // "title": "^Ed\\ Sheeran\\ \\-\\ Galway\\ Girl$"
+               }
+            ],
+            "type": "con"
+        },
+        {
+            "border": "pixel",
+            "current_border_width": 1,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 653,
+               "width": 826,
+               "x": 0,
+               "y": 0
+            },
+            "marks": [],
+            "name": "Terminal - cava",
+            "percent": 0.1,
+            "swallows": [
+               {
+               // "class": "^Xfce4\\-terminal$",
+               // "instance": "^xfce4\\-terminal$",
+               // "machine": "^dornemaster\\-eos$",
+               // "title": "^Terminal\\ \\-\\ cava$",
+               // "window_role": "^xfce4\\-terminal\\-1722528683\\-493947539$"
+               }
+            ],
+            "type": "con"
+        }
+    ]
+}
+

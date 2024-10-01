@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+status="$(xset -q | grep Num | awk '{ print $8 }')"
+lockstatus=""
+color="#cad3f5"
+bgcolor="#24273a"
+
+if [ "$status" == "off" ]; then
+    lockstatus="<span>  0 </span>"
+    color="#cad3f5"
+    bgcolor="#24273a"
+
+    echo ${lockstatus}
+    echo ${lockstatus}
+    echo ${color}
+    echo ${bgcolor}
+    echo "#24273a"
+else
+    lockstatus="<span>  0 </span>"
+    color="#000000"
+    bgcolor="#b7bdf8"
+
+    echo ${lockstatus}
+    echo ${lockstatus}
+    echo ${color}
+    echo ${bgcolor}
+    echo 1
+fi
