@@ -293,7 +293,6 @@ bindsym $mod+p exec --no-startup-id /usr/local/bin/switch-audio-port
 ## App shortcuts
 bindsym $mod+w exec --no-startup-id /usr/bin/brave
 bindsym $mod+n exec --no-startup-id /usr/bin/thunar
-bindsym $mod+c exec --no-startup-id /usr/bin/vscodium
 bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'gimp ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f'
 
 ## Take screenshot with `scrot` via mouse drag

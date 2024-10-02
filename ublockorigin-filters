@@ -42,6 +42,8 @@ m.youtube.com##ytm-single-column-watch-next-results-renderer ytm-thumbnail-overl
 youtube.com##ytd-rich-grid-row, #contents.ytd-rich-grid-row:style(display:contents !important;)
 www.youtube.com##yt-tab-shape.yt-tab-shape-wiz--host-clickable.yt-tab-shape-wiz:nth-of-type(3)
 youtube.com##ytd-search a[href="/@t3dotgg"]:upward(ytd-video-renderer)
+youtube.com##ytd-search a[href="/@CodersGyan"]:upward(ytd-video-renderer)
+youtube.com##ytd-search a[href="/@harkirat1"]:upward(ytd-video-renderer)
 
 linkedin.com##li:has-text(Applied)
 www.linkedin.com##li:has-text(Applied)
