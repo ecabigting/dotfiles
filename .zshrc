@@ -120,10 +120,11 @@ nerdfetch
 
 # mange history
 HISTFILE="$HOME/.zsh_history"
-HISTSIZE=10000000
-SAVEHIST=10000000
+HISTSIZE=10000
+SAVEHIST=10000
 
-HISTORY_IGNORE="(ls|cd|pwd|exit|cd|clear|go run)*"
+HISTORY_IGNORE="(ls|cd|pwd|exit|cd|clear|go run|nvim|air|lazygit|go build|go mod)*"
+
 setopt EXTENDED_HISTORY      # Write the history file in the ':start:elapsed;command' format.
 setopt INC_APPEND_HISTORY    # Write to the history file immediately, not when the shell exits.
 setopt SHARE_HISTORY         # Share history between all sessions.
@@ -144,5 +145,5 @@ if [[ ! -f "$SSH_AUTH_SOCK" ]]; then
     source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
 fi
 
-# load go
+
 export PATH=$PATH:$HOME/go/bin
