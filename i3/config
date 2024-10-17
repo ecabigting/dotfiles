@@ -197,7 +197,7 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 
 # keybinding in fancy rofi (automated):
-bindsym F1 exec --no-startup-id ~/.config/i3/scripts/keyhint-2
+# bindsym F1 exec --no-startup-id ~/.config/i3/scripts/keyhint-2
 # alternative
 # keybinding list in editor:
 # bindsym $mod+F1 exec --no-startup-id xed ~/.config/i3/keybindings
@@ -329,16 +329,16 @@ set $ws10 "10:X"
 # use workspaces on different displays:
 # where you have to replace VGA-0/HDMI-0 with the names for your displays
 # you can get from xrandr command
-workspace $ws1 output DP-0
-workspace $ws2 output DP-0
-workspace $ws3 output DP-0
-workspace $ws4 output DP-0
-workspace $ws5 output DP-0
-workspace $ws6 output HDMI-0
-workspace $ws7 output HDMI-0
-workspace $ws8 output HDMI-0
-workspace $ws9 output HDMI-0
-workspace $ws10 output HDMI-0
+workspace $ws1 output DP-2
+workspace $ws2 output DP-2
+workspace $ws3 output DP-2
+workspace $ws4 output DP-2
+workspace $ws5 output DP-2
+workspace $ws6 output HDMI-1
+workspace $ws7 output HDMI-1
+workspace $ws8 output HDMI-1
+workspace $ws9 output HDMI-1
+workspace $ws10 output HDMI-1
 
 # move focused workspace between monitorsL
 bindsym $mod+Ctrl+greater move workspace to output right
@@ -355,10 +355,10 @@ assign [class="Brave-browser"] $ws1
 #assign [class="Xfce4-terminal"] $ws3
 #assign [class="Google-chrome"] $ws4
 assign [class="xfreerdp"] $ws5
-assign [class="Microsoft Teams - Preview"] $ws6
+assign [class="teams-for-linux"] $ws6
 assign [class="firefox"] $ws6
 assign [class="Gimp"] $ws9
-
+assign [class="steam"] $ws4
 # automatic set focus new window if it opens on another workspace than the current:
 #for_window [class=Xfce4-terminal] focus
 #for_window [class=(?i)firefox] focus
@@ -489,7 +489,7 @@ exec --no-startup-id sleep 3 && brave
 # exec --no-startup-id sleep 10 && ~/.config/autostartworkapps.sh
 
 # on week days open firefox and teams for work as well as the win11 vm and then open the xfreedp3
-exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && { sleep 3 && teams && firefox; }
+exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && { sleep 3 && teams-for-linux && firefox; }
 exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && { sleep 10 && ~/.config/vmstart.sh; }
 
 ###############
@@ -526,7 +526,8 @@ for_window [class="qt5ct" instance="qt5ct"] floating enable
 for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
 for_window [class="Bluetooth-sendto" instance="bluetooth-sendto"] floating enable
 for_window [class="Pamac-manager"] floating enable
-for_window [class="steam_app_238960"] floating enable
+for_window [class="steam_app_2429640"] floating enable
+for_window [class="steam"] floating enable
 for_window [window_role="About"] floating enable
 
 # set border of floating window
