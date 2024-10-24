@@ -11,6 +11,17 @@ return {
         enabled = false,
         exclude = { "vue" }, -- filetypes for which you don't want to enable inlay hints
       },
+      servers = {
+        eslint = {
+          settings = {
+            useFlatConfig = false,
+            workingDirectories = { mode = "auto" },
+            experimental = {
+              useFlatConfig = false,
+            },
+          },
+        },
+      },
     },
   },
 }
