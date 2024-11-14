@@ -12,7 +12,7 @@
 #
 # Endeavouros-i3 config file
 # Source for complete framework of our i3 config and theming here: https://github.com/endeavouros-team/endeavouros-i3wm-setup
-# Endeav_urOS wiki holds some Information also: https://discovery.endeavouros.com/window-tiling-managers/i3-wm/
+# EndeavourOS wiki holds some Information also: https://discovery.endeavouros.com/window-tiling-managers/i3-wm/
 # Please see http://i3wm.org/docs/userguide.html for the official i3 reference!
 
 #######################
@@ -359,16 +359,18 @@ assign [class="teams-for-linux"] $ws6
 assign [class="firefox"] $ws6
 assign [class="Gimp"] $ws9
 assign [class="steam"] $ws4
+assign [class="heroic"] $ws4
 # automatic set focus new window if it opens on another workspace than the current:
 # for_window [class=Xfce4-terminal] focus
 # for_window [class=(?i)firefox] focus
 # for_window [class=Thunar] focus
 # for_window [class=Thunderbird] focus
 # for_window [class=TelegramDesktop] focus
+# for_window [class="xfreerdp"] focus
 # for_window [class="microsoft teams - preview"] focus
 # for_window [class="Gimp"] focus
 
-# open fullscreen the following
+# open the following apps in fullscreen
 for_window [class="xfreerdp"] fullscreen
 
 
@@ -437,7 +439,6 @@ exec --no-startup-id ~/.screenlayout/monitor.sh
 #exec --no-startup-id sleep 1 && feh --bg-fill ~/src/devmachine-dot-files/wallpapers/54.png
 exec --no-startup-id sleep 1 && variety
 
-
 # set powersavings for display:
 exec --no-startup-id xset s 480 dpms 600 600 600
 
@@ -485,14 +486,16 @@ exec --no-startup-id sleep 1.7 && xfce4-terminal --title=">> cava" -x cava
 # exec --no-startup-id sleep 1.3 && spotify
 
 #Start Brave Browser on Workspace 1
-exec --no-startup-id sleep 3 && brave
+#exec --no-startup-id sleep 3 && brave
 
 #autostart work related apps depending on the hour of the day and if its a weekday
 # exec --no-startup-id sleep 10 && ~/.config/autostartworkapps.sh
 
 # on week days open firefox and teams for work as well as the win11 vm and then open the xfreedp3
-exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && { sleep 3 && teams-for-linux && firefox; }
+exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && { sleep 3 && firefox & teams-for-linux; }
 exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && { sleep 10 && ~/.config/vmstart.sh; }
+
+
 
 ###############
 # system tray #
@@ -507,7 +510,7 @@ exec --no-startup-id blueberry-tray
 exec --no-startup-id nm-applet
 
 # clipman-applet
-exec --no-startup-id xfce4-clipman-
+exec --no-startup-id xfce4-clipman
 
 ##################
 # floating rules #
@@ -529,7 +532,7 @@ for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
 for_window [class="Bluetooth-sendto" instance="bluetooth-sendto"] floating enable
 for_window [class="Pamac-manager"] floating enable
 for_window [class="steam_app_2429640"] floating enable
-for_window [class="steam"] floating enable
+#for_window [class="steam"] floating enable
 for_window [window_role="About"] floating enable
 
 # set border of floating window
