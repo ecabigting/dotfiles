@@ -1,14 +1,11 @@
 return {
   -- Autocompletion
   "hrsh7th/nvim-cmp",
-  config = function()
-    require("cmp").setup({
-      sources = {
-        { name = "nvim_lsp" },
-        { name = "snippets", keyword_length = 3 },
-        { name = "path" },
-        { name = "buffer", keyword_length = 4 },
-      },
-    })
+  dependencies = { "hrsh7th/cmp-emoji" },
+  ---@param opts cmp.ConfigSchema
+  opts = function(_, opts)
+    table.insert(opts.sources, { name = "emoji" })
+    table.insert(opts.sources, { name = "snippets", keyword_length = 3 })
+    table.insert(opts.sources, { name = "buffer", keyword_length = 4 })
   end,
 }
