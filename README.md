@@ -458,7 +458,7 @@ Get the themes from [catppuccin xfce4-terminal](https://github.com/catppuccin/xf
 
 Read docs [here](https://github.com/aome510/spotify-player)
 
-We need cargo first, which comes in with rust:
+We need `cargo` first, which comes in with rust:
 
 ```zsh
 pacman -S rust
@@ -467,7 +467,7 @@ pacman -S rust
 Then using `cargo` install `spotify-player`
 
 ```zsh
-cargo install spotify_player --no-default-features --features pulseaudio-backend,media-control,streaming
+cargo install spotify_player --no-default-features --features pulseaudio-backend,streaming,media-control,fzf,notify
 ```
 
 The above method installs the essentials with out the `image` feature which loads the album art in the player
