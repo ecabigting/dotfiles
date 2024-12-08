@@ -2,9 +2,10 @@
 active_window_class=$(xdotool getactivewindow getwindowclassname)
 
 # Specify the application you want to protect
-protected_app="xfreerdp"
+protected_app1="xfreerdp"
+protected_app2="aocli.exe"
 
-# Check if the active window is not the protected application
-if [[ "$active_window_class" != *"$protected_app"* ]]; then
+# Check if the active window is not one of the protected applications
+if [[ "$active_window_class" != *"$protected_app1"* && "$active_window_class" != *"$protected_app2"* ]]; then
   i3-msg kill
 fi
