@@ -9,7 +9,7 @@ return {
     -- refer to the configuration section below
     bigfile = { enabled = true },
     dashboard = { enabled = true },
-    explorer = { enabled = false },
+    explorer = { enabled = true, replace_netrw = true },
     indent = { enabled = true },
     input = { enabled = true },
     picker = {
@@ -17,6 +17,7 @@ return {
         explorer = {
           hidden = true,
           ignored = true,
+          replace_netrw = true,
         },
         files = {
           hidden = true,
