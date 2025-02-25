@@ -12,7 +12,19 @@ return {
     explorer = { enabled = false },
     indent = { enabled = true },
     input = { enabled = true },
-    picker = { enabled = true },
+    picker = {
+      sources = {
+        explorer = {
+          hidden = true,
+          ignored = true,
+        },
+        files = {
+          hidden = true,
+          ignored = true,
+          exclude = { "node_modules", "dist", ".git" },
+        },
+      },
+    },
     notifier = { enabled = true },
     quickfile = { enabled = true },
     scope = { enabled = true },
