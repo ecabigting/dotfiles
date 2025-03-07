@@ -73,7 +73,8 @@ focus_follows_mouse no
 bindsym $mod+Tab workspace next_on_output
 bindsym $mod+Shift+Tab workspace prev_on_output
 
-
+# open notification center
+bindsym $mod+Shift+Ctrl+n exec --no-startup-id ~/.config/dunst/notification_center.sh
 
 # switch to workspace
 bindcode $mod+10    workspace  $ws1
@@ -353,9 +354,10 @@ bindsym $mod+Ctrl+less move workspace to output left
 #assign [class="thunderbird"] $ws4
 #assign [class="TelegramDesktop"] $ws5
 assign [class="Brave-browser"] $ws1
+assign [class="Thorium-browser"] $ws2
+assign [class="Google-chrome"] $ws3
 #assign [class="VSCodium"] $ws2
 #assign [class="Xfce4-terminal"] $ws3
-#assign [class="Google-chrome"] $ws4
 assign [class="xfreerdp"] $ws5
 assign [class="teams-for-linux"] $ws6
 assign [class="firefox"] $ws6
@@ -478,7 +480,7 @@ exec --no-startup-id /usr/bin/dunst
 # always open the keyboard layout screnshot on Gimo and spotify on WORKSPACE 9 then open cava audio visualizer
 exec --no-startup-id sleep 1 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/ws9.json"
 exec --no-startup-id sleep 1.1 && xfce4-terminal --title=">> unimatrix" -x unimatrix -af -c=magenta -s=88 
-exec --no-startup-id sleep 1.3 && gimp -s /home/stifmiester/vmshare/stifmiester-lily58KeyMaps_mercury.png 
+exec --no-startup-id sleep 1.3 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_venus.png
 exec --no-startup-id sleep 1.5 && xfce4-terminal --title=">> spotify_player" -x ~/.cargo/bin/spotify_player
 exec --no-startup-id sleep 1.7 && xfce4-terminal --title=">> cava" -x cava
 #spotify-player in terminal temporary not working due to librespot auth issue, using spotify native clieent(eeeh)
@@ -737,3 +739,7 @@ bindsym --release Num_Lock exec pkill -SIGRTMIN+10 i3blocks
 
 # Turn on on startup Num lock 
 exec --no-startup-id xdotool key --clearmodifiers Num_Lock
+
+# bind mouse button 9 to space key
+exec --no-startup-id xbindkeys -f ~/.config/.xbindkeysrc
+

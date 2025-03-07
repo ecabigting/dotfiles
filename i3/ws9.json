@@ -72,7 +72,7 @@
             },
             "marks": [],
             "name":"spotify - Xfce4-terminal",
-            "percent": 0.9,
+            "percent": 0.7,
             "swallows": [
                {
                     "class": "Xfce4-terminal"
@@ -93,7 +93,7 @@
             },
             "marks": [],
             "name": "cava - Xfce4-terminal",
-            "percent": 0.1,
+            "percent": 0.3,
             "swallows": [
                {
                "class": "Xfce4-terminal"
