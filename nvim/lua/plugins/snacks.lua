@@ -17,7 +17,6 @@ return {
         explorer = {
           hidden = true,
           ignored = true,
-          replace_netrw = true,
         },
         files = {
           hidden = true,
