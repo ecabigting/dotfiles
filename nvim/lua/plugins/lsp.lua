@@ -13,13 +13,13 @@ return {
       },
       servers = {
         eslint = {
-          settings = {
-            useFlatConfig = false,
-            workingDirectories = { mode = "auto" },
-            experimental = {
-              useFlatConfig = false,
-            },
-          },
+          -- settings = {
+          --   useFlatConfig = false,
+          --   workingDirectories = { mode = "auto" },
+          --   experimental = {
+          --     useFlatConfig = false,
+          --   },
+          -- },
         },
       },
     },
