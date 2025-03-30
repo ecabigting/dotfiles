@@ -9,7 +9,7 @@ return {
     -- refer to the configuration section below
     bigfile = { enabled = true },
     dashboard = { enabled = false },
-    explorer = { enabled = true, replace_netrw = true },
+    -- explorer = { enabled = true, replace_netrw = true },
     indent = { enabled = true },
     input = { enabled = true },
     picker = {
@@ -17,11 +17,12 @@ return {
         explorer = {
           hidden = true,
           ignored = true,
+          exclude = { "node_modules", "dist", ".git", ".next" },
         },
         files = {
           hidden = true,
           ignored = true,
-          exclude = { "node_modules", "dist", ".git" },
+          exclude = { "node_modules", "dist", ".git", ".next" },
         },
       },
     },
