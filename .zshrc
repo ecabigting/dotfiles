@@ -120,10 +120,10 @@ nerdfetch
 
 # mange history
 HISTFILE="$HOME/.zsh_history"
-HISTSIZE=10000
-SAVEHIST=10000
+HISTSIZE=100000
+SAVEHIST=100000
 
-HISTORY_IGNORE="(ls|cd|pwd|exit|cd|clear|go run|nvim|air|lazygit|go build|go mod)*"
+HISTORY_IGNORE="(ls|cd|pwd|exit|cd|clear|go run|nvim|air|lazygit|go build|go mod|btop)*"
 
 setopt EXTENDED_HISTORY      # Write the history file in the ':start:elapsed;command' format.
 setopt INC_APPEND_HISTORY    # Write to the history file immediately, not when the shell exits.
@@ -145,5 +145,13 @@ if [[ ! -f "$SSH_AUTH_SOCK" ]]; then
     source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
 fi
 
+# Add preview ont CTRL+T of fzf with bat
+# Preview file content using bat (https://github.com/sharkdp/bat)
+export FZF_CTRL_T_OPTS="
+  --walker-skip .git,node_modules,target
+  --preview 'bat -n --color=always {}'
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'"
 
 export PATH=$PATH:$HOME/go/bin
+
+export PATH="$PATH:$HOME/.dotnet"
