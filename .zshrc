@@ -116,8 +116,6 @@ export NVM_DIR="$HOME/.nvm"
 # add cargo
 export "PATH=$HOME/.cargo/bin:$PATH"
 
-nerdfetch
-
 # mange history
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=100000
@@ -155,3 +153,5 @@ export FZF_CTRL_T_OPTS="
 export PATH=$PATH:$HOME/go/bin
 
 export PATH="$PATH:$HOME/.dotnet"
+
+fastfetch --logo small
