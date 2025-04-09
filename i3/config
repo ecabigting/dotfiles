@@ -493,9 +493,16 @@ exec --no-startup-id sleep 1.7 && xfce4-terminal --title=">> cava" -x cava
 # exec --no-startup-id sleep 10 && ~/.config/autostartworkapps.sh
 
 # on week days open firefox and teams for work as well as the win11 vm and then open the xfreedp3
-exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && { sleep 3 && firefox & teams-for-linux; }
-exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && { sleep 10 && ~/.config/vmstart.sh; }
-
+# exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && firefox && teams-for-linux
+# exec --no-startup-id [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ] && ~/.config/vmstart.sh
+exec --no-startup-id sh -c ' \
+  if [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ]; then \
+    firefox & \
+    teams-for-linux & \
+    sleep 10 && \
+    ~/.config/vmstart.sh; \
+  fi \
+'
 
 
 ###############
