@@ -121,7 +121,7 @@ HISTFILE="$HOME/.zsh_history"
 HISTSIZE=100000
 SAVEHIST=100000
 
-HISTORY_IGNORE="(ls|tmux|pwd|exit|cd|clear|go run|nvim|air|lazygit|gp|btop|npm)*"
+HISTORY_IGNORE="(ls|tmux|pwd|exit|cd|clear|go|nvim|air|lazygit|gp|btop|npm|docker-compose)*"
 
 setopt EXTENDED_HISTORY      # Write the history file in the ':start:elapsed;command' format.
 setopt INC_APPEND_HISTORY    # Write to the history file immediately, not when the shell exits.
