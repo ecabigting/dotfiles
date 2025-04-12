@@ -9,7 +9,10 @@ return {
     -- refer to the configuration section below
     bigfile = { enabled = true },
     dashboard = { enabled = false },
-    -- explorer = { enabled = true, replace_netrw = true },
+    explorer = {
+      enabled = true,
+      replace_netrw = true,
+    },
     indent = { enabled = true },
     input = { enabled = true },
     picker = {
@@ -18,11 +21,19 @@ return {
           hidden = true,
           ignored = true,
           exclude = { "node_modules", "dist", ".git", ".next" },
+          win = {
+            list = {
+              keys = {
+                ["<leader>/"] = false,
+              },
+            },
+          },
         },
         files = {
           hidden = true,
           ignored = true,
           exclude = { "node_modules", "dist", ".git", ".next" },
+          keys = { { "<leader>/", false } }, -- # this does not work
         },
       },
     },
@@ -34,13 +45,16 @@ return {
     words = { enabled = true },
   },
   keys = {
-    { "<leader>/", false },
     {
       "<leader>t",
       function()
         Snacks.picker.grep()
       end,
       desc = "Grep (Root Dir)",
-    },
+    }, -- # remapped grep to <leader>t
+    {
+      "<leader>/",
+      false,
+    }, -- # removes it from which-key menu
   },
 }
