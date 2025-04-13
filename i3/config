@@ -475,14 +475,18 @@ exec --no-startup-id /usr/bin/dunst
 #exec --no-startup-id sleep 7 && firefox https://github.com/endeavouros-team/endeavouros-i3wm-setup/blob/main/force-knowledge.md
 #exec --no-startup-id sleep 3 && thunar
 
-
-
 # always open the keyboard layout screnshot on Gimo and spotify on WORKSPACE 9 then open cava audio visualizer
-exec --no-startup-id sleep 1 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/ws9.json"
+exec --no-startup-id sleep 1 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/updatedWs9.json"
 exec --no-startup-id sleep 1.1 && xfce4-terminal --title=">> unimatrix" -x unimatrix -af -c=magenta -s=88 
 exec --no-startup-id sleep 1.3 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_venus.png
-exec --no-startup-id sleep 1.5 && xfce4-terminal --title=">> spotify_player" -x ~/.cargo/bin/spotify_player
-exec --no-startup-id sleep 1.7 && xfce4-terminal --title=">> cava" -x cava
+# exec --no-startup-id nm-online -t 1.5 && xfce4-terminal --title=">> spotify_player" -x ~/.cargo/bin/spotify_player
+exec --no-startup-id sleep 2 && xfce4-terminal --title=">> cava" -x cava
+
+# --- MODIFIED LINE for Spotify Player ---
+# We use sleep 1.5 to launch the *terminal* on time.
+# The command inside the terminal (-e "sh -c '...'") waits for the network.
+exec --no-startup-id sleep 1.5 && xfce4-terminal --title=">> spotify_player" -e "sh -c 'nm-online -t 60 && exec ~/.cargo/bin/spotify_player || echo Network timeout. Press Enter to close.; read'"
+
 #spotify-player in terminal temporary not working due to librespot auth issue, using spotify native clieent(eeeh)
 # exec --no-startup-id sleep 1.3 && spotify
 
