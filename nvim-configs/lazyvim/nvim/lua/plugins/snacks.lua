@@ -20,7 +20,7 @@ return {
         explorer = {
           hidden = true,
           ignored = true,
-          exclude = { "node_modules", "dist", ".git", ".next" },
+          exclude = { "node_modules", "dist", ".git", ".next", ".expo" },
           win = {
             list = {
               keys = {
@@ -32,7 +32,7 @@ return {
         files = {
           hidden = true,
           ignored = true,
-          exclude = { "node_modules", "dist", ".git", ".next" },
+          exclude = { "node_modules", "dist", ".git", ".next", ".expo" },
           keys = { { "<leader>/", false } }, -- # this does not work
         },
       },
