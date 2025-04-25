@@ -5,6 +5,9 @@ virsh --connect qemu:///system start win11-base
 # Wait for VM to boot (adjust sleep time if needed)
 sleep 50
 
+echo "-- Focus on WS 5 -- "
+i3-msg workspace "5:"
+
 echo "-- Starting xfreerdp --"
 xfreerdp3 \
   -grab-keyboard \
