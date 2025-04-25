@@ -23,7 +23,6 @@
 # is used in the bar {} block below.
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font pango: Noto Sans Regular 10
 font pango: MesloLGS Nerd Font Bold 11
 
 # set the mod key to the winkey:
@@ -88,30 +87,6 @@ bindcode $mod+17    workspace  $ws8
 bindcode $mod+18    workspace  $ws9
 bindcode $mod+19    workspace  $ws10
 
-# switch to workspace with numpad keys
-bindcode $mod+87 workspace $ws1
-bindcode $mod+88 workspace $ws2
-bindcode $mod+89 workspace $ws3
-bindcode $mod+83 workspace $ws4
-bindcode $mod+84 workspace $ws5
-bindcode $mod+85 workspace $ws6
-bindcode $mod+79 workspace $ws7
-bindcode $mod+80 workspace $ws8
-bindcode $mod+81 workspace $ws9
-bindcode $mod+90 workspace $ws10
-
-# switch to workspace with numlock numpad keys
-bindcode $mod+Mod2+87 workspace $ws1
-bindcode $mod+Mod2+88 workspace $ws2
-bindcode $mod+Mod2+89 workspace $ws3
-bindcode $mod+Mod2+83 workspace $ws4
-bindcode $mod+Mod2+84 workspace $ws5
-bindcode $mod+Mod2+85 workspace $ws6
-bindcode $mod+Mod2+79 workspace $ws7
-bindcode $mod+Mod2+80 workspace $ws8
-bindcode $mod+Mod2+81 workspace $ws9
-bindcode $mod+Mod2+90 workspace $ws10
-
 # move focused container to workspace
 bindcode $mod+Shift+10    move container to workspace  $ws1
 bindcode $mod+Shift+11    move container to workspace  $ws2
@@ -124,51 +99,20 @@ bindcode $mod+Shift+17    move container to workspace  $ws8
 bindcode $mod+Shift+18    move container to workspace  $ws9
 bindcode $mod+Shift+19    move container to workspace  $ws10
 
-# move focused container to workspace with numpad keys
-bindcode $mod+Shift+Mod2+87 	move container to workspace  $ws1
-bindcode $mod+Shift+Mod2+88 	move container to workspace  $ws2
-bindcode $mod+Shift+Mod2+89 	move container to workspace  $ws3
-bindcode $mod+Shift+Mod2+83 	move container to workspace  $ws4
-bindcode $mod+Shift+Mod2+84 	move container to workspace  $ws5
-bindcode $mod+Shift+Mod2+85 	move container to workspace  $ws6
-bindcode $mod+Shift+Mod2+79 	move container to workspace  $ws7
-bindcode $mod+Shift+Mod2+80 	move container to workspace  $ws8
-bindcode $mod+Shift+Mod2+81 	move container to workspace  $ws9
-bindcode $mod+Shift+Mod2+90 	move container to workspace  $ws10
-
-# move focused container to workspace with numpad keys
-bindcode $mod+Shift+87 	 move container to workspace  $ws1
-bindcode $mod+Shift+88 	 move container to workspace  $ws2
-bindcode $mod+Shift+89 	 move container to workspace  $ws3
-bindcode $mod+Shift+83 	 move container to workspace  $ws4
-bindcode $mod+Shift+84 	 move container to workspace  $ws5
-bindcode $mod+Shift+85 	 move container to workspace  $ws6
-bindcode $mod+Shift+79 	 move container to workspace  $ws7
-bindcode $mod+Shift+80 	 move container to workspace  $ws8
-bindcode $mod+Shift+81 	 move container to workspace  $ws9
-bindcode $mod+Shift+90 	 move container to workspace  $ws10
-
 # resize window (you can also use the mouse for that):
 mode "resize" {
-# These bindings trigger as soon as you enter the resize mode
-# Pressing left will shrink the window's width.
-# Pressing right will grow the window's width.
-# Pressing up will shrink the window's height.
-# Pressing down will grow the window's height.
-        # bindsym h resize shrink width 10 px or 10 ppt
-        # bindsym j resize grow height 10 px or 10 ppt
-        # bindsym k resize shrink height 10 px or 10 ppt
-        # bindsym l resize grow width 10 px or 10 ppt
+      # These bindings trigger as soon as you enter the resize mode
+      # Pressing left will shrink the window's width.
+      # Pressing right will grow the window's width.
+      # Pressing up will shrink the window's height.
+      bindsym Left resize shrink width 10 px or 10 ppt
+      bindsym Down resize grow height 10 px or 10 ppt
+      bindsym Up resize shrink height 10 px or 10 ppt
+      bindsym Right resize grow width 10 px or 10 ppt
 
-# same bindings, but for the arrow keys
-       bindsym Left resize shrink width 10 px or 10 ppt
-       bindsym Down resize grow height 10 px or 10 ppt
-       bindsym Up resize shrink height 10 px or 10 ppt
-       bindsym Right resize grow width 10 px or 10 ppt
-
-# back to normal: Enter or Escape
+      # back to normal: Enter or Escape
 	    bindsym Return mode "default"
-        bindsym Escape mode "default"
+      bindsym Escape mode "default"
 }
 
 bindsym $mod+r mode "resize"
@@ -181,15 +125,16 @@ bindsym $mod+r mode "resize"
 bindsym $mod+Return exec --no-startup-id xfce4-terminal
 
 # kill focused window
-#bindsym $mod+q kill
-bindsym $mod+q exec --no-startup-id ~/.config/i3/scripts/kill_window.sh
+# bindsym $mod+q kill #default setting
+# below is a custom script to escape some other type of window
+bindsym $mod+q exec --no-startup-id ~/.config/i3/scripts/kill_window.sh 
 
 # exit-menu
 bindsym $mod+Shift+e exec --no-startup-id ~/.config/i3/scripts/powermenu
 
 # Lock the system
 # lock with a picture:
-#bindsym $mod+l exec --no-startup-id i3lock -i  ~/.config/i3/i3-lock-screen.png -p default|win -t
+# bindsym $mod+l exec --no-startup-id i3lock -i  ~/.config/i3/i3-lock-screen.png -p default|win -t
 # lock by blurring the screen:
 bindsym $mod+l exec --no-startup-id ~/.config/i3/scripts/blur-lock
 
@@ -285,13 +230,13 @@ bindsym XF86AudioMute exec --no-startup-id ~/.config/i3/scripts/volume_brightnes
 bindsym XF86AudioMicMute exec amixer sset Capture toggle
 
 # audio control
-bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause 
+bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause -p spotify_player
 # Above line will also work for pausing
-bindsym XF86AudioNext exec --no-startup-id playerctl next
-bindsym XF86AudioPrev exec --no-startup-id playerctl previous
+bindsym XF86AudioNext exec --no-startup-id playerctl next -p spotify_player
+bindsym XF86AudioPrev exec --no-startup-id playerctl previous -p spotify_player
 
 # Redirect sound to headphones
-bindsym $mod+p exec --no-startup-id /usr/local/bin/switch-audio-port
+# bindsym $mod+p exec --no-startup-id /usr/local/bin/switch-audio-port
 
 ## App shortcuts
 bindsym $mod+w exec --no-startup-id /usr/bin/brave
@@ -468,7 +413,7 @@ exec --no-startup-id /usr/bin/dunst
 # autotiling script
 # https://github.com/nwg-piotr/autotiling
 # `yay -S autotiling ;) (it is in AUR)
-#exec_always --no-startup-id autotiling
+exec_always --no-startup-id autotiling
 
 # Autostart apps as you like
 #exec --no-startup-id sleep 2 && xfce4-terminal
@@ -489,9 +434,6 @@ exec --no-startup-id sleep 1.5 && xfce4-terminal --title=">> spotify_player" -e 
 
 #spotify-player in terminal temporary not working due to librespot auth issue, using spotify native clieent(eeeh)
 # exec --no-startup-id sleep 1.3 && spotify
-
-#Start Brave Browser on Workspace 1
-#exec --no-startup-id sleep 3 && brave
 
 #autostart work related apps depending on the hour of the day and if its a weekday
 # exec --no-startup-id sleep 10 && ~/.config/autostartworkapps.sh
@@ -551,7 +493,7 @@ for_window [class="aocli.exe"] floating enable, move position 770 20
 for_window [window_role="About"] floating enable
 
 # set border of floating window
-for_window [class="urxvt"] border pixel 1
+# for_window [class="urxvt"] border pixel 1
 
 # floating steam friends list
 for_window [title="Friends List"] floating enable
@@ -559,13 +501,26 @@ for_window [title="Friends List"] floating enable
 # settings for arcadia online client
 for_window [class="aocli.exe"] move position 775 px 10 px
 
-for_window [title=".*PrinceRicky.*"] move to workspace $ws1
+# Bolter Sideworld Party
+for_window [title=".*BolterVee.*"] move to workspace $ws1
 for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
 for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
-for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws4
-for_window [title=".*BolterVee.*"] move to workspace $ws5
+for_window [title=".*MasterRickSanchez.*"] move to workspace $ws4
+for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws5
 
+# Bard HO Party
+# for_window [title=".*MasterRickSanchez.*"] move to workspace $ws1
+# for_window [title=".*FingerRickingGood.*"] move to workspace $ws2
+# for_window [title=".*BolterVee.*"] move to workspace $ws3
+# for_window [title=".*MistressSwanchez.*"] move to workspace $ws4
+# for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws5
 
+# Shield Boom party
+# for_window [title=".*KingRickySan.*"] move to workspace $ws1
+# for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
+# for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
+# for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws4
+# for_window [title=".*BolterVee.*"] move to workspace $ws5
 
 # set size of floating window
 #for_window [window_role="(?i)GtkFileChooserDialog"] resize set 640 480 #to set size of file choose dialog
@@ -642,7 +597,7 @@ client.background        $base
 # Start i3bar to display a workspace bar
 # (plus the system information i3status finds out, if available)
 bar {
-		font pango: MesloLGS Nerd Font Propo Bold 11, Icons 11
+		font pango: MesloLGS Nerd Font Bold 11, Icons 11
 		status_command i3blocks -c ~/.config/i3/i3blocks.conf
 		position bottom
 		# i3bar_command i3bar --transparency
