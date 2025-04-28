@@ -1,0 +1,26 @@
+[terminal]
+	#shell = { program = "wsl.exe", args = ["~"] }
+	shell = { program = "wsl.exe ~", args = ["tmux new -A -s dorneRemote"]  }
+
+[window]
+	opacity = 0.9
+	decorations = "None"
+	startup_mode = "Maximized"
+	#startup_mode = "Fullscreen"
+	padding = { x = 11, y = 5 }
+	dynamic_padding = true
+	blur = true
+	
+[font]
+	size = 11
+	normal = { family = "MesloLGLDZ Nerd Font Mono", style = "Bold"} 
+
+[general]
+	import = [
+		"C:\\Users\\xxxxxx\\AppData\\Roaming\\alacritty\\themes\\themes\\catppuccin_macchiato.toml"
+	]
+	
+[env]
+	TERM = "xterm-256color" 
+	COLORTERM = "truecolor"
+	TERM_PROGRAM = "alacritty"
