@@ -10,10 +10,10 @@ iface="${IFACE:-$iface}"
 dt="${DT:-3}"
 unit="${UNIT:-MB}"
 #LABEL="${LABEL:-<span font='FontAwesome'> </span>}" # down arrow up arrow
-LABELUP="${LABELUP:-<span color='green'> </span>}"
+LABELUP="${LABELUP:-<span color='green'></span>}"
 #LABELDOWN="${LABELDOWN:-<span font='FontAwesome' color='red'>⬆️</span>}"
 #printf_command="${PRINTF_COMMAND:-"printf \"%1.0f${LABELUP}/%1.0f${LABELDOWN} \\n\", rx, wx;"}"
-printf_command="${PRINTF_COMMAND:-"printf \"${LABELUP} %1.0f ${unit}\\n\", rx,unit;"}"
+printf_command="${PRINTF_COMMAND:-"printf \"${LABELUP} %1.0f${unit}\\n\", rx,unit;"}"
 
 function default_interface {
   ip route | awk '/^default via/ {print $5; exit}'
