@@ -246,6 +246,7 @@ assign [class="Vivaldi-stable"] $ws3
 #assign [class="VSCodium"] $ws2
 #assign [class="Xfce4-terminal"] $ws3
 assign [class="xfreerdp"] $ws5
+assign [class="Virt-manager"] $ws5
 assign [class="teams-for-linux"] $ws6
 assign [class="firefox"] $ws6
 assign [class="Gimp"] $ws9
