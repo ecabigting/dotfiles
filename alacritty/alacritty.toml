@@ -1,0 +1,28 @@
+[terminal]
+	#shell = { program = "wsl.exe", args = ["~"] }
+  #shell = { program = "wsl.exe ~", args = ["tmux new -A -s dorneRemote"]  }
+
+[window]
+	opacity = 0.7
+	# decorations = "Full"
+	startup_mode = "Maximized"
+	padding = { x = 11, y = 5 }
+	dynamic_padding = true
+	blur = false
+	
+[font]
+	size = 13
+	normal = { family = "MesloLGMDZ Nerd Font Mono", style = "Bold"}
+
+[general]
+	import = [
+      # uncomment the flavour you want below:
+      # "~/.config/alacritty/catppuccin-latte.toml"
+      # "~/.config/alacritty/catppuccin-frappe.toml"
+      # "~/.config/alacritty/catppuccin-macchiato.toml"
+      "~/.config/alacritty/catppuccin-mocha.toml"
+	]
+[env]
+	TERM = "xterm-256color" 
+	COLORTERM = "truecolor"
+	TERM_PROGRAM = "alacritty"

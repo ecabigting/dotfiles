@@ -19,11 +19,11 @@
                 "y": 0
             },
             "marks": [],
-            "name": "unimatrix - Xfce4-terminal",
+            "name": "unimatrix - alacritty",
             "percent": 0.183333333333333,
             "swallows": [
                 {
-                    "class": "Xfce4-terminal"
+                    "class": "Alacritty"
                 }
             ],
             "type": "con"
@@ -39,11 +39,11 @@
                 "y": 0
             },
             "marks": [],
-            "name": "spotify - Xfce4-terminal",
+            "name": "spotify - alacritty",
             "percent": 0.633333333333333,
             "swallows": [
                 {
-                    "class": "Xfce4-terminal"
+                    "class": "Alacritty"
                 }
             ],
             "type": "con"
@@ -59,11 +59,11 @@
                 "y": 0
             },
             "marks": [],
-            "name": "cava - Xfce4-terminal",
+            "name": "cava - alacritty",
             "percent": 0.183333333333333,
             "swallows": [
                 {
-                    "class": "Xfce4-terminal"
+                    "class": "Alacritty"
                 }
             ],
             "type": "con"
