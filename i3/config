@@ -186,11 +186,11 @@ set $ws2 "2:2"
 set $ws3 "3:3"
 set $ws4 "4:4"
 set $ws5 "5:"
-set $ws6 "6:"
+set $ws6 "6: "
 set $ws7 "7:7"
 set $ws8 "8:8"
-set $ws9 "9:"
-set $ws10 "10:10"
+set $ws9 "9: "
+set $ws10 "10: "
 
 # switch to workspace
 bindcode $mod+10    workspace  $ws1
@@ -249,7 +249,7 @@ assign [class="xfreerdp"] $ws5
 assign [class="Virt-manager"] $ws5
 assign [class="teams-for-linux"] $ws6
 assign [class="firefox"] $ws6
-assign [class="Gimp"] $ws9
+assign [class="Gimp"] $ws10
 assign [class="steam"] $ws4
 assign [class="heroic"] $ws4
 # automatic set focus new window if it opens on another workspace than the current:
@@ -320,18 +320,19 @@ exec_always --no-startup-id autotiling
 exec --no-startup-id sleep 1 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/updatedWs9.json"
 # Start unimatrix in the terminal in the layout in ws9
 exec --no-startup-id sleep 1.1 && alacritty --title=">> unimatrix" -e unimatrix -af -c=magenta -s=88 
-# Start gimp with my keyboard layout screenshot in the layout in ws9
-exec --no-startup-id sleep 1.3 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_venus.png
-# Start cava in the terminal in the layout in ws9
-exec --no-startup-id sleep 2 && alacritty --title=">> cava" -e cava
 # Start spotify_player in the terminal in the in ws9
 # Need to use nm-online to check if network is online before actually opening spotify_player
-exec --no-startup-id sleep 1.5 && alacritty --title=">> spotify_player" -e sh -c 'nm-online -t 60 && exec ~/.cargo/bin/spotify_player || echo "Network timeout. Press Enter to close."; read'
+exec --no-startup-id sleep 1.2 && alacritty --title=">> spotify_player" -e sh -c 'nm-online -t 60 && exec ~/.cargo/bin/spotify_player || echo "Network timeout. Press Enter to close."; read'
+# Start cava in the terminal in the layout in ws9
+exec --no-startup-id sleep 1.3 && alacritty --title=">> cava" -e cava
+# Start btop  in the terminal in the layout in ws9
+exec --no-startup-id sleep 1.4 && alacritty --title=">> btop" -e btop
 
 # On week days open firefox and teams for work
 exec --no-startup-id sh -c ' \
   if [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ]; then \
     firefox & \
+    sleep 1 & \
     teams-for-linux; \
   fi \
 '
@@ -346,6 +347,9 @@ exec --no-startup-id sh -c ' \
 #   fi \
 # '
 #
+
+# Start gimp with my keyboard layout screenshot in the layout in ws10
+exec --no-startup-id sleep 1.3 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_venus.png
 
 ###############
 # system tray #
@@ -373,7 +377,8 @@ for_window [class="Galculator" instance="galculator"] floating enable
 for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
 for_window [class="Variety" instance="Variety"] floating enable
 for_window [class="vlc" instance="vlc"] floating enable
-for_window [class="feh" instance="feh"] floating enable, move position 3729 px 0 px
+for_window [class="Viewnior" instance="viewnior"] floating enable
+# for_window [class="feh" instance="feh"] floating enable, move position 3729 px 0 px
 
 # set floating (nontiling) for special apps
 for_window [class="Xsane" instance="xsane"] floating enable
@@ -454,6 +459,7 @@ set $surface0 #363a4f
 set $base #24273a
 set $mantle #1e2030
 set $crust #181926
+set $transparentbase #24273a1A
 
 ### Catppuccin Colors
 # target                 title     bg    text   indicator  border
@@ -471,28 +477,28 @@ client.background        $base
 # Start i3bar to display a workspace bar
 # (plus the system information i3status finds out, if available)
 bar {
-    font pango: MesloLGMDZ Nerd Font Regular 12
+    font pango: MesloLGMDZ Nerd Font Regular 14
     status_command i3blocks -c ~/.config/i3/i3blocks.conf
     position bottom
     i3bar_command i3bar --transparency
     # # it could be that you have no primary display set: set one (xrandr --output <output> --primary)
     # # reference: https://i3wm.org/docs/userguide.html#_tray_output
     tray_output primary
-    tray_padding 4
+    tray_padding 3
     # When strip_workspace_numbers is set to yes,
     # any workspace that has a name of the form
     # “[n][:][NAME]” will display only the name.
     strip_workspace_numbers yes
     ### Catppuccin Colors for i3bar
     colors {
-            separator          $base
-            background         $base
+            separator          $transparentbase
+            background         $transparentbase
             statusline         $text
             focused_statusline $text
-            focused_separator  $base
-            focused_workspace  $base $base $green	$red
-            active_workspace   $base $base $blue	$red
-            inactive_workspace $base $base $surface1	$red
+            focused_separator  $transparentbase
+            focused_workspace  $transparentbase $transparentbase  $green  $red
+            active_workspace   $transparentbase $transparentbase $blue	$red
+            inactive_workspace $transparentbase $transparentbase $surface1	$red
             urgent_workspace   $red	$red $base	$lavender
             binding_mode       $red	$red $base	$lavender
     }

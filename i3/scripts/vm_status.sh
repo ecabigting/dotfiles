@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Set the IP address of your Windows VM
-VM_IP="xxx.xxx.xx.xxx" # Replace this with the actual IP address of your VM
+VM_IP="192.168.1.24" # Replace this with the actual IP address of your VM
 
 # Set the name of your VM as it appears in Virt-Manager
-VM_NAME="awesomevmthatreallyexistinmyhostmachine" # Replace this with the actual name of your VM
+VM_NAME="win11-base" # Replace this with the actual name of your VM
 
 # Detect click events
 case $BLOCK_BUTTON in
@@ -20,7 +20,7 @@ case $BLOCK_BUTTON in
     fi
 
     # Open Virt-Manager and connect directly to the VM in the background
-    i3-msg workspace "5:" &
+    i3-msg -q workspace "5:" &
     i3-msg -q exec "virt-manager --connect qemu:///system --show-domain-console '$VM_NAME'" &
   ) &
   ;;
@@ -29,8 +29,8 @@ esac
 # Ping the VM to check if it's online (with a timeout)
 if ping -c 1 -W 1 "$VM_IP" &>/dev/null; then
   # If online, display a green computer icon
-  echo "<span color='green'>󰍹 </span>VM " # Nerd Font icons for computer and checkmark
+  echo "<span color='green'>󰍹 </span>VM" # Nerd Font icons for computer and checkmark
 else
   # If offline, display a red computer icon
-  echo "<span color='red'>󰶐 </span>VM " # Nerd Font icons for computer and cross
+  echo "<span color='red'>󰶐 </span>VM" # Nerd Font icons for computer and cross
 fi

@@ -1,19 +1,10 @@
 #!/usr/bin/env bash
-#
-# Copyright (C) 2015 James Murphy
-# Licensed under the terms of the GNU GPL v2 only.
-#
-# i3blocks blocklet script to monitor bandwidth usage
-
 iface="${BLOCK_INSTANCE}"
 iface="${IFACE:-$iface}"
 dt="${DT:-3}"
-unit="${UNIT:-MB}"
-#LABEL="${LABEL:-<span font='FontAwesome'> </span>}" # down arrow up arrow
-LABELUP="${LABELUP:-<span color='green'></span>}"
-#LABELDOWN="${LABELDOWN:-<span font='FontAwesome' color='red'>⬆️</span>}"
-#printf_command="${PRINTF_COMMAND:-"printf \"%1.0f${LABELUP}/%1.0f${LABELDOWN} \\n\", rx, wx;"}"
-printf_command="${PRINTF_COMMAND:-"printf \"${LABELUP} %1.0f${unit}\\n\", rx,unit;"}"
+unit="${UNIT:-Mb}"
+LABELUP="${LABELUP:-<span color='green'>󰇚</span>}"
+printf_command="${PRINTF_COMMAND:-"printf \"${LABELUP}%1.0f${unit}\\n\", rx,unit;"}"
 
 function default_interface {
   ip route | awk '/^default via/ {print $5; exit}'
@@ -31,30 +22,6 @@ function list_interfaces {
   echo "Interfaces in /proc/net/dev:"
   grep -o "^[^:]\\+:" /proc/net/dev | tr -d " :"
 }
-
-while getopts i:t:u:p:lh opt; do
-  case "$opt" in
-  i) iface="$OPTARG" ;;
-  t) dt="$OPTARG" ;;
-  u) unit="$OPTARG" ;;
-  p) printf_command="$OPTARG" ;;
-  l) list_interfaces && exit 0 ;;
-  h) printf \
-    "Usage: bandwidth3 [-i interface] [-t time] [-u unit] [-p printf_command] [-l] [-h]
-Options:
--i\tNetwork interface to measure. Default determined using \`ip route\`.
--t\tTime interval in seconds between measurements. Default: 3
--u\tUnits to measure bytes in. Default: Mb
-\tAllowed units: Kb, KB, Mb, MB, Gb, GB, Tb, TB
-\tUnits may have optional it/its/yte/ytes on the end, e.g. Mbits, KByte
--p\tAwk command to be called after a measurement is made. 
-\tDefault: printf \"<span font='FontAwesome'>  </span>%%-5.1f/%%5.1f %%s/s\\\\n\", rx, wx, unit;
-\tExposed variables: rx, wx, tx, unit, iface
--l\tList available interfaces in /proc/net/dev
--h\tShow this help text
-" && exit 0 ;;
-  esac
-done
 
 check_proc_net_dev
 
@@ -96,13 +63,9 @@ done) |
 BEGIN{old_received='"$init_received"';old_sent='"$init_sent"'}
 {
     received=$2
-    sent=$10
     rx=(received-old_received)/scalar;
-    wx=(sent-old_sent)/scalar;
-    tx=rx+wr;
     old_received=received;
-    old_sent=sent;
-    if(rx >= 0 && wx >= 0){
+    if(rx >= 0){
         '"$printf_command"';
         fflush(stdout);
     }

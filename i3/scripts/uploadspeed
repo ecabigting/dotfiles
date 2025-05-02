@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+iface="${BLOCK_INSTANCE}"
+iface="${IFACE:-$iface}"
+dt="${DT:-3}"
+unit="${UNIT:-Mb}"
+LABELUP="${LABELUP:-<span color='green'>󰕒</span>}"
+printf_command="${PRINTF_COMMAND:-"printf \"${LABELUP}%1.0f${unit}\\n\", wx,unit;"}"
+
+function default_interface {
+  ip route | awk '/^default via/ {print $5; exit}'
+}
+
+function check_proc_net_dev {
+  if [ ! -f "/proc/net/dev" ]; then
+    echo "/proc/net/dev not found"
+    exit 1
+  fi
+}
+
+function list_interfaces {
+  check_proc_net_dev
+  echo "Interfaces in /proc/net/dev:"
+  grep -o "^[^:]\\+:" /proc/net/dev | tr -d " :"
+}
+
+check_proc_net_dev
+
+iface="${iface:-$(default_interface)}"
+while [ -z "$iface" ]; do
+  echo No default interface
+  sleep "$dt"
+  iface=$(default_interface)
+done
+
+case "$unit" in
+Kb | Kbit | Kbits) bytes_per_unit=$((1024 / 8)) ;;
+KB | KByte | KBytes) bytes_per_unit=$((1024)) ;;
+Mb | Mbit | Mbits) bytes_per_unit=$((1024 * 1024 / 8)) ;;
+MB | MByte | MBytes) bytes_per_unit=$((1024 * 1024)) ;;
+Gb | Gbit | Gbits) bytes_per_unit=$((1024 * 1024 * 1024 / 8)) ;;
+GB | GByte | GBytes) bytes_per_unit=$((1024 * 1024 * 1024)) ;;
+Tb | Tbit | Tbits) bytes_per_unit=$((1024 * 1024 * 1024 * 1024 / 8)) ;;
+TB | TByte | TBytes) bytes_per_unit=$((1024 * 1024 * 1024 * 1024)) ;;
+*) echo Bad unit "$unit" && exit 1 ;;
+esac
+
+scalar=$((bytes_per_unit * dt))
+init_line=$(cat /proc/net/dev | grep "^[ ]*$iface:")
+if [ -z "$init_line" ]; then
+  echo Interface not found in /proc/net/dev: "$iface"
+  exit 1
+fi
+
+init_received=$(awk '{print $2}' <<<$init_line)
+init_sent=$(awk '{print $10}' <<<$init_line)
+
+(while true; do
+  # Continuously read the network statistics from /proc/net/dev
+  cat /proc/net/dev
+  sleep "$dt" # Pause for the user-defined interval ($dt) before the next update
+done) |
+  # Filter to extract data only for the specified network interface ($iface)
+  stdbuf -oL grep "^[ ]*$iface:" |
+  awk -v scalar="$scalar" -v unit="$unit" -v iface="$iface" '
+BEGIN{
+  # Initialize old_sent with the user-provided initial value ($init_sent)
+  old_sent='"$init_sent"'
+}
+{
+    # Extract the sent bytes (10th field from /proc/net/dev)
+    sent=$10
+
+    # Calculate the upload speed in the appropriate unit using the scalar
+    wx=(sent-old_sent)/scalar;
+
+    # Store the current sent bytes for the next iteration
+    old_sent=sent;
+
+    # Only print if the upload speed is non-negative
+    if(wx >= 0){
+        '"$printf_command"';
+        fflush(stdout); # Ensure immediate output
+    }
+}
+'

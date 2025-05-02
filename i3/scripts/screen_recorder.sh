@@ -15,7 +15,7 @@ start_recording() {
   MONITOR_SOURCE="${DEFAULT_SINK}.monitor"
 
   # Start ffmpeg in the background and save its PID
-  ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f pulse -i "$MONITOR_SOURCE" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -c:a aac -b:a 192k -async 1 ~/Videos/$(date +%Y-%m-%d-%T)-screen-recording.mp4 &
+  ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f pulse -i "$MONITOR_SOURCE" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -c:a aac -b:a 192k -async 1 ~/Videos/$(date +%Y-%m-%d-%H%M%S)-screen-recording.mp4 &
   echo $! >"$PID_FILE"
   notify-send "Screen Recording" "Recording started."
 }

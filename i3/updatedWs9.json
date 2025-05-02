@@ -1,6 +1,5 @@
 // vim:ts=4:sw=4:et
 {
-    // splitv split container with 3 children
     "border": "pixel",
     "floating": "auto_off",
     "layout": "splitv",
@@ -82,11 +81,11 @@
         "y": 0
     },
     "marks": [],
-    "name": "stifmiester-lily58KeyMaps_mercury - GIMP",
+    "name": "btop",
     "percent": 0.5,
     "swallows": [
         {
-            "class": "Gimp"
+            "class": "Alacritty"
         }
     ],
     "type": "con"
