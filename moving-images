@@ -1,0 +1,10 @@
+find /mnt/FilesSSD/src/wallpapers/ -type f -name '*.jpg' -o -name '*.png' -o -name '*.jpeg' | while read file; do
+  resolution=$(identify -format "%w %h" "$file" 2>/dev/null)
+  if [ -n "$resolution" ]; then
+    width=$(echo $resolution | awk '{print $1}')
+    height=$(echo $resolution | awk '{print $2}')
+    if [ "$width" -eq 1920 ] && [ "$height" -gt 1079 ]; then
+      mv "$file" /mnt/FilesSSD/src/sortingwp/FHD-1920x1080/
+    fi
+  fi
+done
