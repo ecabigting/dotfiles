@@ -19,6 +19,7 @@ return {
             preset = "sidebar",
             layout = {
               width = 0.25,
+              min_width = 19,
             },
           },
           hidden = true,
@@ -46,6 +47,7 @@ return {
     scroll = { enabled = true },
     statuscolumn = { enabled = true },
     words = { enabled = true },
+    image = { enabled = false },
   },
   keys = {
     {

@@ -1,13 +1,15 @@
 return {
-  "saghen/blink.cmp",
-  opts = {
-    sources = {
-      -- adding any nvim-cmp sources here will enable them
-      -- with blink.compat
-      -- compat = { name = "buffer", keyword_length = 9999 },
-      default = function()
-        return { "snippets", "lsp", "path" }
+  {
+    "saghen/blink.cmp",
+    opts = {
+      enabled = function()
+        return not vim.tbl_contains({ "markdown" }, vim.bo.filetype)
       end,
+      sources = {
+        default = function()
+          return { "lsp", "path", "snippets" }
+        end,
+      },
     },
   },
 }
