@@ -1,5 +1,14 @@
 # Cool `neovim` tips and tricks
 
+## select all lines in a file and copy to clipboard
+
+`:%y+`
+
+- Press `:` enters command-line mode.
+- Press `%` represents the entire file.
+- Press `y` stands for "yank" (which is Vim's term for copy).
+- Press `+` specifies that you want to copy to the system clipboard (if your Vim is compiled with clipboard support).
+
 ## insert text at start of multiple lines
 
 - `Ctrl+v`- To enter Visual Block mode.
@@ -19,7 +28,7 @@
 
 ## select words and update like `ctrl+d` in `vscode`
 
-- Put the cursor over the word you want to edit
+- Select the word you want to edit by pressing '/' then `enter`.
 - Press `c` + `g` + `n`, the current word will be deleted and you can type the new word as replacement
 - Press `Esc` to escape and then press `.` to replace the next occurrence of the word
 - You can use `ctrl+N` or `ctrl+n` to move back and forth the word occurrences before pressing `.`. This gives you the option to select which word to replace.
