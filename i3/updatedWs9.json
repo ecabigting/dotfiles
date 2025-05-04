@@ -18,7 +18,7 @@
                 "y": 0
             },
             "marks": [],
-            "name": "unimatrix - alacritty",
+            "name": ">> unimatrix",
             "percent": 0.183333333333333,
             "swallows": [
                 {
@@ -38,7 +38,7 @@
                 "y": 0
             },
             "marks": [],
-            "name": "spotify - alacritty",
+            "name": ">> spotify_player",
             "percent": 0.633333333333333,
             "swallows": [
                 {
@@ -58,7 +58,7 @@
                 "y": 0
             },
             "marks": [],
-            "name": "cava - alacritty",
+            "name": ">> cava",
             "percent": 0.183333333333333,
             "swallows": [
                 {
@@ -81,7 +81,7 @@
         "y": 0
     },
     "marks": [],
-    "name": "btop",
+    "name": ">> btop",
     "percent": 0.5,
     "swallows": [
         {

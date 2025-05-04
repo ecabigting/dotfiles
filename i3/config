@@ -59,8 +59,7 @@ bindsym $mod+r mode "resize"
 
 # start a terminal
 # bindsym $mod+Return exec --no-startup-id xfce4-terminal -x tmux new -A -s callMeMartell
-bindsym $mod+Return exec --no-startup-id alacritty --command tmux new -A -s callMeMartell
-
+bindsym $mod+Return exec --no-startup-id alacritty --title=">> alacritty-main-tmux" -e tmux new -A -s callMeMartell 
 # kill focused window
 # bindsym $mod+q kill #default setting
 # custom script to escape some other type of window
@@ -263,7 +262,7 @@ assign [class="heroic"] $ws4
 for_window [class="xfreerdp"] fullscreen
 
 ##############
-# compositor #
+# compositor 
 ##############
 
 # picom: https://wiki.archlinux.org/title/Picom
@@ -275,20 +274,14 @@ exec_always --no-startup-id picom --config  ~/.config/picom.conf
 # autostart applications/services on login: #
 #############################################
 
-# open notification center
-bindsym $mod+Shift+Ctrl+n exec --no-startup-id ~/.config/dunst/notification_center.sh
-
 # get auth work with polkit-gnome
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 # start i3 with dex
 exec --no-startup-id dex --autostart --environment i3
 
-# start welcome app
-#exec --no-startup-id sh /usr/share/endeavouros/scripts/welcome --startdelay=3 
-
 # num lock activated
-exec --no-startup-id numlockx on
+# exec --no-startup-id numlockx on
 
 # start conky:
 #exec_always --no-startup-id conky
@@ -316,24 +309,27 @@ exec_always --no-startup-id autotiling
 
 ## AUTO START APPS
 
+# Start gimp with my keyboard layout screenshot in the layout in ws10
+exec --no-startup-id sleep 1.2 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_venus.png
+
 # Setup Workspace 9 with my custom layout
-exec --no-startup-id sleep 1 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/updatedWs9.json"
+exec --no-startup-id sleep 1.3 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/updatedWs9.json"
 # Start unimatrix in the terminal in the layout in ws9
-exec --no-startup-id sleep 1.1 && alacritty --title=">> unimatrix" -e unimatrix -af -c=magenta -s=88 
+exec --no-startup-id sleep 1.5 && alacritty --title=">> unimatrix" -e unimatrix -af -c=magenta -s=88 
 # Start spotify_player in the terminal in the in ws9
 # Need to use nm-online to check if network is online before actually opening spotify_player
-exec --no-startup-id sleep 1.2 && alacritty --title=">> spotify_player" -e sh -c 'nm-online -t 60 && exec ~/.cargo/bin/spotify_player || echo "Network timeout. Press Enter to close."; read'
+exec --no-startup-id sleep 1.7 && alacritty --title=">> spotify_player" -e sh -c 'nm-online -t 60 && exec ~/.cargo/bin/spotify_player || echo "Network timeout. Press Enter to close."; read'
 # Start cava in the terminal in the layout in ws9
-exec --no-startup-id sleep 1.3 && alacritty --title=">> cava" -e cava
+exec --no-startup-id sleep 1.9 && alacritty --title=">> cava" -e cava
 # Start btop  in the terminal in the layout in ws9
-exec --no-startup-id sleep 1.4 && alacritty --title=">> btop" -e btop
+exec --no-startup-id sleep 2 && alacritty --title=">> btop" -e btop
 
-# On week days open firefox and teams for work
 exec --no-startup-id sh -c ' \
   if [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ]; then \
-    firefox & \
-    sleep 1 & \
-    teams-for-linux; \
+    i3-msg "workspace $ws6" \
+    i3-msg firefox & \
+    sleep 2 & \
+    i3-msg teams-for-linux; \
   fi \
 '
 
@@ -346,10 +342,6 @@ exec --no-startup-id sh -c ' \
 #     ~/.config/vmstart.sh; \
 #   fi \
 # '
-#
-
-# Start gimp with my keyboard layout screenshot in the layout in ws10
-exec --no-startup-id sleep 1.3 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_venus.png
 
 ###############
 # system tray #
@@ -361,7 +353,7 @@ exec --no-startup-id sleep 1.3 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily
 exec --no-startup-id blueberry-tray
 
 # networkmanager-applet
-# exec --no-startup-id nm-applet
+exec --no-startup-id nm-applet
 
 # clipman-applet
 exec --no-startup-id xfce4-clipman
@@ -484,7 +476,7 @@ bar {
     # # it could be that you have no primary display set: set one (xrandr --output <output> --primary)
     # # reference: https://i3wm.org/docs/userguide.html#_tray_output
     tray_output primary
-    tray_padding 3
+    tray_padding 0
     # When strip_workspace_numbers is set to yes,
     # any workspace that has a name of the form
     # “[n][:][NAME]” will display only the name.

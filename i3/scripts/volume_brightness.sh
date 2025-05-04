@@ -8,6 +8,7 @@ notification_timeout=1000
 download_album_art=true
 show_album_art=true
 show_music_in_volume_indicator=true
+volume_is_going_up=true
 
 # Uses regex to get volume from pactl
 function get_volume {
@@ -30,11 +31,17 @@ function get_volume_icon {
   mute=$(get_mute)
   if [ "$volume" -eq 0 ] || [ "$mute" == "yes" ]; then
     volume_icon="  "
-  elif [ "$volume" -lt 50 ]; then
-    volume_icon=" XX  "
+  elif [ "$volume_is_going_up" == "true" ]; then
+    volume_icon="  "
   else
-    volume_icon="   "
+    volume_icon="  "
   fi
+
+  # elif [ "$volume" -lt 50 ]; then
+  #   volume_icon="   "
+  # else
+  #   volume_icon="   "
+  # fi
 }
 
 # Always returns the same icon - I couldn't get the brightness-low icon to work with fontawesome
@@ -83,7 +90,7 @@ function show_volume_notif {
       get_album_art
     fi
 
-    notify-send -t $notification_timeout -h string:x-dunst-stack-tag:volume_notif -h int:value:$volume -i "$album_art" "$volume_icon $volume%" "$current_song"
+    dunstify -t $notification_timeout -h string:x-dunst-stack-tag:volume_notif -h int:value:$volume -i "$album_art" "$volume_icon    $volume%" "$current_song"
   else
     notify-send -t $notification_timeout -h string:x-dunst-stack-tag:volume_notif -h int:value:$volume "$volume_icon $volume%"
   fi
@@ -116,6 +123,7 @@ volume_up)
   # Unmutes and increases volume, then displays the notification
   pactl set-sink-mute @DEFAULT_SINK@ 0
   volume=$(get_volume)
+  volume_is_going_up=true
   if [ $(("$volume" + "$volume_step")) -gt $max_volume ]; then
     pactl set-sink-volume @DEFAULT_SINK@ $max_volume%
   else
@@ -126,6 +134,7 @@ volume_up)
 
 volume_down)
   # Raises volume and displays the notification
+  volume_is_going_up=false
   pactl set-sink-volume @DEFAULT_SINK@ -$volume_step%
   show_volume_notif
   ;;
