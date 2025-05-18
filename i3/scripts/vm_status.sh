@@ -29,8 +29,8 @@ esac
 # Ping the VM to check if it's online (with a timeout)
 if ping -c 1 -W 1 "$VM_IP" &>/dev/null; then
   # If online, display a green computer icon
-  echo "<span color='green'>󰍹 </span>VM" # Nerd Font icons for computer and checkmark
+  echo "<span color='green'>󰍹</span>" # Nerd Font icons for computer and checkmark
 else
   # If offline, display a red computer icon
-  echo "<span color='red'>󰶐 </span>VM" # Nerd Font icons for computer and cross
+  echo "<span color='red'>󰶐</span>" # Nerd Font icons for computer and cross
 fi
