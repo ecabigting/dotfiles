@@ -152,7 +152,7 @@ bindsym XF86AudioPrev exec --no-startup-id playerctl previous -p spotify_player
 # bindsym $mod+p exec --no-startup-id /usr/local/bin/switch-audio-port
 
 ## App shortcuts
-bindsym $mod+w exec --no-startup-id /usr/bin/brave
+bindsym $mod+w exec --no-startup-id /usr/bin/zen-browser
 bindsym $mod+n exec --no-startup-id /usr/bin/thunar
 bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'gimp ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f'
 
@@ -239,7 +239,7 @@ bindsym $mod+Ctrl+less move workspace to output left
 #assign [class="Thunar"] $ws3
 #assign [class="thunderbird"] $ws4
 #assign [class="TelegramDesktop"] $ws5
-assign [class="Brave-browser"] $ws1
+assign [class="zen"] $ws1
 assign [class="Thorium-browser"] $ws2
 assign [class="Vivaldi-stable"] $ws3
 #assign [class="VSCodium"] $ws2
