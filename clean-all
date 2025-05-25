@@ -1,0 +1,34 @@
+#!/bin/bash
+
+## package managers
+echo "Cleaning pacman and yay cache..." # Slightly more accurate echo
+sudo pacman -Scc --noconfirm            # Add --noconfirm to avoid interactive prompts if this is automated
+if command -v yay >/dev/null 2>&1; then # Check if yay is installed
+  yay -Scc --noconfirm
+else
+  echo "yay not found, skipping yay cache clean."
+fi
+sudo rm -rf /var/cache/pacman/pkg/**
+
+## logs
+echo "Cleaning logs(journalctl)"
+sudo journalctl --vacuum-time=1d
+sudo journalctl --vacuum-size=1M
+
+## npm, go
+echo "Cleaning go modcache.."
+go clean -modcache
+echo "Cleaning npm and nvm cache.."
+npm cache clear --force
+echo "Cleaning _npx/ folder"
+rm -rf ~/.npm/_npx/*
+
+## docker
+#docker system prune -af --volumes &
+#docker volume rm $(docker volume ls -q)
+
+echo "Cleaning docker containers,images,volumes.."
+docker system prune -af
+docker image prune -af
+docker system prune -af --volumes
+docker system df
