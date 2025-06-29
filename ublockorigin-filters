@@ -33,6 +33,9 @@ www.youtube.com##ytd-reel-shelf-renderer:has(#title:has-text(/(^| )Shorts.?Remix
 ! Hide shorts category on homepage and search pages
 www.youtube.com##yt-chip-cloud-chip-renderer:has(yt-formatted-string:has-text(/^Shorts$/i))
 
+! Hide shorts fucking shelf in search results
+www.youtube.com##grid-shelf-view-model:has(span:has-text(/^Shorts$/i))
+
 !!! MOBILE !!!
 
 ! Hide all videos in home feed containing the phrase "#shorts"
@@ -61,8 +64,10 @@ m.youtube.com##yt-tab-shape:has-text(/^Shorts$/)
 m.youtube.com##ytm-reel-shelf-renderer:has(.reel-shelf-title-wrapper .yt-core-attributed-string:has-text(/(^| )Shorts.?Remix.*$/i))
 
 ! Hide shorts category on homepage
-m.youtube.com##ytm-chip-cloud-chip-renderer:has(.yt-core-attributed-string:has-text(/^Shorts$/i))
+m.youtube.com##ytm-rich-section-renderer:has(.rich-section-content)
 
+!Hide shorts on search pages
+m.youtube.com##ytm-reel-shelf-renderer.item
 
 youtube.com##ytd-search a[href="/@t3dotgg"]:upward(ytd-video-renderer)
 youtube.com##ytd-search a[href="/@CodersGyan"]:upward(ytd-video-renderer)
@@ -77,6 +82,4 @@ www.linkedin.com##li:has-text(Crossover)
 
 ae.indeed.com##li:has-text(Crossover)
 indeed.com##li:has-text(Crossover)
-
-
 
