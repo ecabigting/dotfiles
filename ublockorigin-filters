@@ -1,4 +1,3 @@
-
 ! Remove empty spaces in grid
 www.youtube.com##ytd-rich-grid-row,#contents.ytd-rich-grid-row:style(display: contents !important)
 
@@ -35,6 +34,9 @@ www.youtube.com##yt-chip-cloud-chip-renderer:has(yt-formatted-string:has-text(/^
 
 ! Hide shorts fucking shelf in search results
 www.youtube.com##grid-shelf-view-model:has(span:has-text(/^Shorts$/i))
+
+! WHAT THE ACTUAL FUCKS ARE PLAYABLES?
+www.youtube.com##ytd-rich-section-renderer:has(span:has-text(/^YouTube Playables$/i))
 
 !!! MOBILE !!!
 
@@ -82,4 +84,5 @@ www.linkedin.com##li:has-text(Crossover)
 
 ae.indeed.com##li:has-text(Crossover)
 indeed.com##li:has-text(Crossover)
+
 
