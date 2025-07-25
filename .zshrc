@@ -121,7 +121,7 @@ HISTFILE="$HOME/.zsh_history"
 HISTSIZE=100000
 SAVEHIST=100000
 
-HISTORY_IGNORE="(ls|tmux|pwd|exit|cd|clear|go|nvim|air|lazygit|gp|btop|npm|docker-compose)*"
+HISTORY_IGNORE="(ls|tmux|pwd|exit|cd|clear|go get|go mod tidy|nvim|air|lazygit|gp|btop|npm|docker-compose)*"
 
 setopt EXTENDED_HISTORY      # Write the history file in the ':start:elapsed;command' format.
 setopt INC_APPEND_HISTORY    # Write to the history file immediately, not when the shell exits.
@@ -155,3 +155,10 @@ export PATH=$PATH:$HOME/go/bin
 export PATH="$PATH:$HOME/.dotnet"
 
 fastfetch --logo small
+
+if [ -n "$TMUX" ]; then
+    printf '\033[2;0t'
+fi
+
+# Launch starship
+eval "$(starship init zsh)"
