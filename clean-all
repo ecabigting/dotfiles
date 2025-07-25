@@ -1,9 +1,12 @@
 #!/bin/bash
 
 ## package managers
-echo "Cleaning pacman and yay cache..." # Slightly more accurate echo
-sudo pacman -Scc --noconfirm            # Add --noconfirm to avoid interactive prompts if this is automated
-if command -v yay >/dev/null 2>&1; then # Check if yay is installed
+echo "==================================================="
+echo "========== Cleaning pacman and yay cache... ======="
+echo "==================================================="
+echo "Cleaning pacman and yay cache..."
+sudo pacman -Scc --noconfirm
+if command -v yay >/dev/null 2>&1; then
   yay -Scc --noconfirm
 else
   echo "yay not found, skipping yay cache clean."
@@ -11,23 +14,34 @@ fi
 sudo rm -rf /var/cache/pacman/pkg/**
 
 ## logs
-echo "Cleaning logs(journalctl)"
+echo "==================================================="
+echo "========= Cleaning logs(journalctl) ==============="
+echo "==================================================="
 sudo journalctl --vacuum-time=1d
 sudo journalctl --vacuum-size=1M
 
 ## npm, go
-echo "Cleaning go modcache.."
+echo "==================================================="
+echo "======== Cleaning go modcache.. ==================="
+echo "==================================================="
 go clean -modcache
-echo "Cleaning npm and nvm cache.."
+echo "Deleting cache folder for go-build.."
+rm -rf ~/.cache/go-build/
+echo "==================================================="
+echo "========== Cleaning npm and nvm cache.. ==========="
+echo "==================================================="
 npm cache clear --force
 echo "Cleaning _npx/ folder"
 rm -rf ~/.npm/_npx/*
 
-## docker
-#docker system prune -af --volumes &
-#docker volume rm $(docker volume ls -q)
-
-echo "Cleaning docker containers,images,volumes.."
+# rust,cargo
+echo "==================================================="
+echo "============ Clean cargo registry.. ==============="
+echo "==================================================="
+rm -rf ~/.cargo/registry/*
+echo "==================================================="
+echo "=== Cleaning docker containers,images,volumes.. ==="
+echo "==================================================="
 docker system prune -af
 docker image prune -af
 docker system prune -af --volumes
