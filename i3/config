@@ -21,6 +21,8 @@ workspace_layout default
 #border indicator on windows:
 default_border none
 
+hide_edge_borders smart
+
 # Set inner/outer gaps
 gaps inner 6
 gaps outer 3
@@ -59,7 +61,7 @@ bindsym $mod+r mode "resize"
 
 # start a terminal
 # bindsym $mod+Return exec --no-startup-id xfce4-terminal -x tmux new -A -s callMeMartell
-bindsym $mod+Return exec --no-startup-id alacritty --title=">> alacritty-main-tmux" -e tmux new -A -s callMeMartell 
+bindsym $mod+Return exec --no-startup-id alacritty --title=" [ alacritty - tmux ] " -e tmux new -A -s callMeMartell 
 # kill focused window
 # bindsym $mod+q kill #default setting
 # custom script to escape some other type of window
@@ -132,7 +134,7 @@ bindsym $mod+space focus mode_toggle
 
 # focus the parent container
 bindsym $mod+a focus parent
-
+ 
 # open new empty workspace
 bindsym $mod+Shift+n exec --no-startup-id ~/.config/i3/scripts/empty_workspace
 
@@ -186,9 +188,9 @@ set $ws3 "3:3"
 set $ws4 "4:4"
 set $ws5 "5:"
 set $ws6 "6: "
-set $ws7 "7:7"
+set $ws7 "7: "
 set $ws8 "8:8"
-set $ws9 "9: "
+set $ws9 "9: "
 set $ws10 "10: "
 
 # switch to workspace
@@ -249,8 +251,10 @@ assign [class="Virt-manager"] $ws5
 assign [class="teams-for-linux"] $ws6
 assign [class="firefox"] $ws6
 assign [class="Gimp"] $ws10
-assign [class="steam"] $ws4
+assign [class="^steam$"] $ws4
+assign [title="Battle.net"] $ws4
 assign [class="heroic"] $ws4
+assign [class="eu.betterbird.Betterbird"] $ws7
 # automatic set focus new window if it opens on another workspace than the current:
 # for_window [class=Xfce4-terminal] focus
 # for_window [class=(?i)firefox] focus
@@ -311,37 +315,21 @@ exec_always --no-startup-id autotiling
 
 # Start gimp with my keyboard layout screenshot in the layout in ws10
 exec --no-startup-id sleep 1.2 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_Jupiter.png
-
 # Setup Workspace 9 with my custom layout
 exec --no-startup-id sleep 1.3 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/updatedWs9.json"
 # Start unimatrix in the terminal in the layout in ws9
-exec --no-startup-id sleep 1.5 && alacritty --title=">> unimatrix" -e unimatrix -af -c=magenta -s=88 
+exec --no-startup-id sleep 1.5 && alacritty --title="[ unimatrix ]" -e unimatrix -af -c=magenta -s=88
 # Start spotify_player in the terminal in the in ws9
 # Need to use nm-online to check if network is online before actually opening spotify_player
-exec --no-startup-id sleep 1.7 && alacritty --title=">> spotify_player" -e sh -c 'nm-online -t 60 && exec ~/.cargo/bin/spotify_player || echo "Network timeout. Press Enter to close."; read'
+exec --no-startup-id sleep 1.7 && alacritty --title="[ spotify_player ]" -e sh -c 'nm-online -t 20 && exec ~/.cargo/bin/spotify_player || echo "Network timeout. Press Enter to close."; read'
 # Start cava in the terminal in the layout in ws9
-exec --no-startup-id sleep 1.9 && alacritty --title=">> cava" -e cava
+exec --no-startup-id sleep 1.8 && alacritty --title="[ cava ]" -e cava
 # Start btop  in the terminal in the layout in ws9
-exec --no-startup-id sleep 2 && alacritty --title=">> btop" -e btop
-
-exec --no-startup-id sleep 2.5 && sh -c ' \
-  if [ $(date +%u) -lt 6 ] && [ $(date +%H) -gt 5 ] && [ $(date +%H) -lt 19 ]; then \
-    i3-msg "workspace $ws6"; \
-    firefox & \
-    sleep 1 && \
-    teams-for-linux & \
-  fi \
-'
-
-# On week days open firefox and teams for work as well as the win11 vm and then open the xfreedp3
-# exec --no-startup-id sh -c ' \
-#   if [ $(date +%u) -lt 6 ] && [ $(date +%H) -lt 18 ]; then \
-#     firefox & \
-#     teams-for-linux & \
-#      sleep 10 && \
-#     ~/.config/vmstart.sh; \
-#   fi \
-# '
+exec --no-startup-id sleep 2 && alacritty --title="[ btop ]" -e btop
+# Start Teams and Firefox on if its A weekday and office hours
+exec --no-startup-id sh -c '( sleep 2.5 && if [ $(date +%u) -lt 6 ] && [ $(date +%H) -gt 5 ] && [ $(date +%H) -lt 19 ]; then i3-msg "workspace $ws6"; firefox & sleep 4 && teams-for-linux & fi ) &'
+# Start betterbird mail client
+exec --no-startup-id sh -c '( sleep 3 && betterbird & ) &'
 
 ###############
 # system tray #
@@ -363,6 +351,7 @@ exec --no-startup-id xfce4-clipman
 ##################
 
 # set floating (nontiling) for apps needing it
+for_window [class="jamesdsp" instance="jamesdsp"] floating enable
 for_window [class="pavucontrol" instance="pavucontrol"] floating enable
 for_window [class="Yad" instance="yad"] floating enable
 for_window [class="Galculator" instance="galculator"] floating enable
@@ -379,10 +368,9 @@ for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
 for_window [class="Bluetooth-sendto" instance="bluetooth-sendto"] floating enable
 for_window [class="Xfce4-clipman-history"] floating enable
 for_window [class="Pamac-manager"] floating enable
-for_window [class="steam_app_2429640"] floating enable
-for_window [class="arcadia-launcher.exe"] floating enable
-for_window [class="aocli.exe"] floating enable, move position 774 px 8 px
-#for_window [class="steam"] floating enable
+for_window [title="Arcadia Launcher"] floating enable
+for_window [title="Arcadia Client"] floating enable, move position 774 px 8 px
+for_window [title="Battle.net"] floating enable
 for_window [window_role="About"] floating enable
 
 # floating steam friends list
@@ -390,13 +378,15 @@ for_window [title="Friends List"] floating enable
 
 # Bolter Sideworld Party
 # for_window [title=".*BolterVee.*"] move to workspace $ws1
+# for_window [title=".*WitchyVee.*"] move to workspace $ws1
 # for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
 # for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
 # for_window [title=".*MasterRickSanchez.*"] move to workspace $ws4
 # for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws5
 
-# Bard HO Party
+# Bard/Dancer HO Party
 # for_window [title=".*MasterRickSanchez.*"] move to workspace $ws1
+# for_window [title=".*LadyVee.*"] move to workspace $ws1
 # for_window [title=".*FingerRickingGood.*"] move to workspace $ws2
 # for_window [title=".*BolterVee.*"] move to workspace $ws3
 # for_window [title=".*MistressSwanchez.*"] move to workspace $ws4
@@ -408,6 +398,19 @@ for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
 for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
 for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws4
 for_window [title=".*BolterVee.*"] move to workspace $ws5
+
+# WS HO Party
+# for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws1
+# for_window [title=".*FingerRickingGood.*"] move to workspace $ws2
+# for_window [title=".*BolterVee.*"] move to workspace $ws4
+# for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
+# for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
+
+# WS Peach Tree
+# for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws1
+# for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
+# for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
+# for_window [title=".*BolterVee.*"] move to workspace $ws4
 
 # set size of floating window
 for_window [window_role="(?i)GtkFileChooserDialog"] resize set 640 480 #to set size of file choose dialog
