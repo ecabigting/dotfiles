@@ -75,6 +75,8 @@ youtube.com##ytd-search a[href="/@t3dotgg"]:upward(ytd-video-renderer)
 youtube.com##ytd-search a[href="/@CodersGyan"]:upward(ytd-video-renderer)
 youtube.com##ytd-search a[href="/@harkirat1"]:upward(ytd-video-renderer)
 
+linkedin.com##li:has-text(Dubai, Dubai,)
+www.linkedin.com##li:has-text(Dubai, Dubai,)
 
 linkedin.com##li:has-text(Applied)
 www.linkedin.com##li:has-text(Applied)
