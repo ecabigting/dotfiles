@@ -1,6 +1,6 @@
 ## extract subtitle ass to .srt file
 ```bash
-for f in *.mkv; do srt_file="${f%.*}.srt"; ffmpeg -i "$f" -map 0:4 -y "$srt_file" && sed -i'' 's/<[^>]*>//g' "$srt_file"; done
+for f in *.mkv; do srt_file="${f%.*}.eng.srt"; ffmpeg -i "$f" -map 0:3 -y "$srt_file" && sed -i'' 's/<[^>]*>//g' "$srt_file"; done
 ```
 This script extracts subtitle from `.mkv` files and put time into `.srt` files. Then reads the same srt file with sed and remove any html tags.
 
