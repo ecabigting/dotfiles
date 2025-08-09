@@ -33,6 +33,7 @@ echo "--- Acknowledged. Building with care and precision. Starting process in: $
 
 # --- Main Logic: Find and process all video files ---
 # Using find piped to a while-read loop is the most robust way to handle all possible filenames.
+# find "$INPUT_ROOT_DIR" -type f | while IFS= read -r SOURCE_FILE; do
 find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= read -r SOURCE_FILE; do
 
   # Use ffprobe to reliably identify video files, not extensions. Stderr is silenced for non-video files.
@@ -114,62 +115,50 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
     fi
   fi
 
-  # --- Subtitle Logic (Final, Decoupled Design) ---
-  SUBTITLE_MAPS_FOR_MKV="" # Only used for image-based subs now
+  # --- Subtitle Logic (Modified to extract all text subs) ---
+  SUBTITLE_MAPS_FOR_MKV="" # Will only be used for image-based fallbacks.
 
   ENG_SUB_STREAMS_JSON=$(echo "$JSON_PROBE" | jq '[.streams[] | select(.codec_type=="subtitle" and ((.tags.language? | ascii_downcase) == "eng"))]')
   NUM_ENG_SUBS=$(echo "$ENG_SUB_STREAMS_JSON" | jq 'length')
   if ((NUM_ENG_SUBS > 0)); then
-    echo "   [SUBTITLE]: Found $NUM_ENG_SUBS English subtitle track(s). Analyzing..."
-    best_sub_index=-1
-    best_score=-999
-    max_line_count=-1
-    echo "   [resetting criterias] -> Best Sub Index: $best_sub_index / Best score: $best_score / Max Line count: $max_line_count "
+    echo "   [SUBTITLE]: Found $NUM_ENG_SUBS English subtitle track(s). Processing all..."
+
+    # Loop through every found English subtitle. No more winner selection.
     while IFS= read -r sub_stream_json; do
       current_index=$(echo "$sub_stream_json" | jq '.index')
-      current_title=$(echo "$sub_stream_json" | jq -r '.tags.title? // ""' | tr '[:upper:]' '[:lower:]')
-      current_description=$(echo "$sub_stream_json" | jq -r '.tags.description? // ""' | tr '[:upper:]' '[:lower:]')
-      current_score=0
+      SUB_CODEC=$(echo "$sub_stream_json" | jq -r '.codec_name')
 
-      echo "    (::Current Criterias::) -> index: $current_index / title: $current_title / desc: $current_description"
-      if [[ "$current_title" == *"dialog"* || "$current_title" == *"full"* ]]; then ((current_score += 10)); fi
-      if [[ "$current_title" == *"sign"* || "$current_title" == *"song"* || "$current_title" == *"force"* ]]; then ((current_score -= 10)); fi
-      line_count=$(ffmpeg -v error -i "$SOURCE_FILE" -map "0:$current_index" -f srt - 2>/dev/null | wc -l)
-      echo "     - Candidate index $current_index: Title='${current_title}', Score=$current_score, Lines=$line_count"
-      if ((current_score > best_score)); then
-        best_score=$current_score
-        max_line_count=$line_count
-        best_sub_index=$current_index
-      elif ((current_score == best_score && line_count > max_line_count)); then
-        max_line_count=$line_count
-        best_sub_index=$current_index
-      fi
-    done < <(echo "$ENG_SUB_STREAMS_JSON" | jq -c '.[]')
-
-    if [[ "$best_sub_index" -ne -1 ]]; then
-      WINNING_SUB_JSON=$(echo "$ENG_SUB_STREAMS_JSON" | jq --argjson i "$best_sub_index" '.[] | select(.index==$i)')
-      SUB_CODEC=$(echo "$WINNING_SUB_JSON" | jq -r '.codec_name')
-      echo "   [SUBTITLE]: Winner selected. Index: $best_sub_index (Codec: $SUB_CODEC)."
-
+      # Check if it's image-based. If so, embed it and move to the next sub.
       if [[ "$SUB_CODEC" == "hdmv_pgs_subtitle" || "$SUB_CODEC" == "dvd_subtitle" ]]; then
-        echo "     - Action: Copying image-based subtitle to embed in MKV."
-        SUBTITLE_MAPS_FOR_MKV="-map 0:$best_sub_index -c:s copy" # Embed what we can't convert
-      else
-        OUTPUT_FILE_SRT="$OUTPUT_DIR/${FILE_NAME_NO_EXT}.eng.srt"
-        echo "     - Action: Extracting and sanitizing text-based subtitle to $OUTPUT_FILE_SRT."
-        # Step 1: Extract the raw SRT from the video file.
-        # Step 2: Use sed to strip all tags, writing the clean result.
-        ffmpeg -nostdin -hide_banner -v error -i "$SOURCE_FILE" -map "0:$best_sub_index" -c:s srt -f srt -y - 2>/dev/null | sed 's/<[^>]*>//g' >"$OUTPUT_FILE_SRT"
-        echo "     - Sanitization complete."
+        echo "     - Action: Found image-based sub at index $current_index. It will be embedded in the MKV."
+        # We only embed the first one found to avoid clutter.
+        if [[ -z "$SUBTITLE_MAPS_FOR_MKV" ]]; then
+          SUBTITLE_MAPS_FOR_MKV="-map 0:$current_index -c:s copy"
+        fi
+        continue
       fi
-    else echo "   [SUBTITLE]: Analysis failed to select a winning track."; fi
-  else echo "   [SUBTITLE]: No English subtitle stream found."; fi
+
+      # It's a text-based sub. Extract and sanitize it.
+      current_title=$(echo "$sub_stream_json" | jq -r '.tags.title? // "track'$current_index'"') # Use title, or fallback to track number
+      # Sanitize the title to create a safe suffix for the filename
+      sanitized_suffix=$(echo "$current_title" | tr '[:upper:]' '[:lower:]' | tr -d '()' | tr -s '[:space:]/' '_' | sed 's/__*/_/g')
+
+      OUTPUT_FILE_SRT="$OUTPUT_DIR/${FILE_NAME_NO_EXT}.eng.${sanitized_suffix}.srt"
+      echo "     - Action: Extracting and sanitizing text-based sub at index $current_index to:"
+      echo "       $OUTPUT_FILE_SRT"
+
+      ffmpeg -hide_banner -v error -i "$SOURCE_FILE" -map "0:$current_index" -c:s srt -f srt -y - 2>/dev/null | sed 's/<[^>]*>//g' >"$OUTPUT_FILE_SRT"
+
+    done < <(echo "$ENG_SUB_STREAMS_JSON" | jq -c '.[]')
+  else
+    echo "   [SUBTITLE]: No English subtitle stream found."
+  fi
 
   # --- Assemble and Execute the MKV Conversion ---
   echo "   Building final MKV conversion command..."
   COMMAND=(ffmpeg -nostdin -hide_banner -v error -stats -i "$SOURCE_FILE" -map 0:v:0 ${VIDEO_OPTS})
   if [[ -n "$AUDIO_MAPS" ]]; then COMMAND+=($AUDIO_MAPS $AUDIO_OPTS); fi
-  # Only add subtitle mapping to the MKV command if it's an image-based sub
+  # Only add subtitle mapping to the MKV command if an image-based sub was found
   if [[ -n "$SUBTITLE_MAPS_FOR_MKV" ]]; then COMMAND+=($SUBTITLE_MAPS_FOR_MKV); fi
   COMMAND+=(-y "$OUTPUT_FILE_MKV")
 
