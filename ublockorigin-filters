@@ -87,4 +87,6 @@ www.linkedin.com##li:has-text(Crossover)
 ae.indeed.com##li:has-text(Crossover)
 indeed.com##li:has-text(Crossover)
 
-
+! Huge AI Block list
+! add in filter list -> import
+! https://raw.githubusercontent.com/laylavish/uBlockOrigin-HUGE-AI-Blocklist/main/list.txt
