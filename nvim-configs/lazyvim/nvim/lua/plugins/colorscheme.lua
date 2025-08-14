@@ -2,22 +2,37 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "catppuccin",
+      colorscheme = "tokyonight-moon",
+    },
+  },
+  {
+    "folke/tokyonight.nvim",
+    lazy = true,
+    enabled = true,
+    opts = {
+      transparent = true,
+      styles = {
+        functions = { bold = true },
+        variables = { italic = true },
+        sidebars = "transparent",
+        floats = "transparent",
+      },
     },
   },
   {
     "catppuccin/nvim",
     lazy = true,
+    enabled = false,
     name = "catppuccin",
     opts = {
-      flavour = "mocha",
+      flavour = "auto",
       transparent_background = true,
       float = {
         transparent = true,
       },
       background = {
         light = "latte",
-        dark = "mocha",
+        dark = "frappe",
       },
       styles = {
         keywords = { "bold", "italic" },
