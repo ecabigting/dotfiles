@@ -2,14 +2,14 @@
 
 status="$(xset -q | grep Num | awk '{ print $8 }')"
 lockstatus="󰎤"
-color="#cad3f5"
-
+bgcolor="#1e203080"
+color="#a6da95"
 if [ "$status" == "off" ]; then
-  bgcolor="#24273a"
-else
-  bgcolor="#b7bdf8"
+  color="#cad3f5"
+  lockstatus="󰎦"
 fi
 
-echo ${lockstatus}
-echo ${color}
-echo ${bgcolor}
+echo ${lockstatus} # full text
+echo ""            # short text
+echo ${color}      # color
+echo ${bgcolor}    # bgcolor

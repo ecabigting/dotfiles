@@ -2,7 +2,7 @@
 # is used in the bar {} block below.
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-font pango: MesloLGS Nerd Font Bold 11px
+font pango: MesloLGS Nerd Font Bold 12px
 
 # set the mod key to the winkey:
 set $mod Mod4
@@ -31,7 +31,7 @@ gaps outer 3
 floating_modifier $mod
 
 # Disable focusing of windows or workspace on mouse hover
-focus_follows_mouse no
+focus_follows_mouse yes
 
 ######################################
 # keybindings for different actions: #
@@ -186,7 +186,7 @@ set $ws1 "1:1"
 set $ws2 "2:2"
 set $ws3 "3:3"
 set $ws4 "4:4"
-set $ws5 "5:"
+set $ws5 "5: "
 set $ws6 "6: "
 set $ws7 "7: "
 set $ws8 "8:8"
@@ -327,7 +327,8 @@ exec --no-startup-id sleep 1.8 && alacritty --title="[ cava ]" -e cava
 # Start btop  in the terminal in the layout in ws9
 exec --no-startup-id sleep 2 && alacritty --title="[ btop ]" -e btop
 # Start Teams and Firefox on if its A weekday and office hours
-exec --no-startup-id sh -c '( sleep 2.5 && if [ $(date +%u) -lt 6 ] && [ $(date +%H) -gt 5 ] && [ $(date +%H) -lt 19 ]; then i3-msg "workspace $ws6"; firefox & sleep 4 && teams-for-linux & fi ) &'
+# exec --no-startup-id sh -c '( sleep 2.5 && if [ $(date +%u) -lt 6 ] && [ $(date +%H) -gt 5 ] && [ $(date +%H) -lt 19 ]; then i3-msg "workspace $ws6"; firefox & sleep 4 && teams-for-linux & fi ) &'
+exec --no-startup-id sh -c '( sleep 2.5 && if [ $(date +%u) -lt 6 ] && [ $(date +%H) -gt 5 ] && [ $(date +%H) -lt 19 ]; then firefox & virsh --connect qemu:///system start win11-base & fi ) &'
 # Start betterbird mail client
 exec --no-startup-id sh -c '( sleep 3 && betterbird & ) &'
 
@@ -447,10 +448,23 @@ set $surface0 #363a4f
 set $base #24273a
 set $mantle #1e2030
 set $crust #181926
-set $transparentbase #24273a1A
+set $transparentbase #1e203080 
+
+##### Transparency table
+# 0 %	   00	#FF000000
+# 10 %   1A	#FF00001A
+# 20 %   33	#FF000033
+# 30 %   4D	#FF00004D
+# 40 %   66	#FF000066
+# 50 %   80	#FF000080
+# 60 %   99	#FF000099
+# 70 %   B3	#FF0000B3
+# 80 %   CC	#FF0000CC
+# 90 %   E6	#FF0000E6
+# 100 %  FF	#FF0000FF
 
 ### Catppuccin Colors
-# target                 title     bg    text   indicator  border
+#target                 title     bg    text   indicator  border
 client.focused           $lavender $base $text  $green  $lavender
 client.focused_inactive  $overlay0 $base $text  $rosewater $overlay0
 client.unfocused         $overlay0 $base $text  $rosewater $overlay0
@@ -465,18 +479,20 @@ client.background        $base
 # Start i3bar to display a workspace bar
 # (plus the system information i3status finds out, if available)
 bar {
-    font pango: MesloLGMDZ Nerd Font Regular 14
+    font pango: MesloLGL Nerd Font Regular 15
     status_command i3blocks -c ~/.config/i3/i3blocks.conf
-    position bottom
+    position top
     i3bar_command i3bar --transparency
+    # i3bar_command i3bar
     # # it could be that you have no primary display set: set one (xrandr --output <output> --primary)
     # # reference: https://i3wm.org/docs/userguide.html#_tray_output
     tray_output primary
-    tray_padding 5
+    tray_padding 7
     # When strip_workspace_numbers is set to yes,
     # any workspace that has a name of the form
     # “[n][:][NAME]” will display only the name.
     strip_workspace_numbers yes
+    workspace_min_width 30
     ### Catppuccin Colors for i3bar
     colors {
             separator          $transparentbase
