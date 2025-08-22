@@ -28,7 +28,8 @@
 
 ## select words and update like `ctrl+d` in `vscode`
 
-- Select the word you want to edit by pressing '/' then `enter`.
+- Press `Shift`+`3`(#) to select all of the occurrence of the word currently under the cursor.
+- You can navigate by pressing `n` for next and `N`(Shift+n) previous to select the word occurrence you want to update.
 - Press `c` + `g` + `n`, the current word will be deleted and you can type the new word as replacement
 - Press `Esc` to escape and then press `.` to replace the next occurrence of the word
 - You can use `ctrl+N` or `ctrl+n` to move back and forth the word occurrences before pressing `.`. This gives you the option to select which word to replace.
