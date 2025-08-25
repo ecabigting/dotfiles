@@ -2,7 +2,7 @@
 # is used in the bar {} block below.
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-font pango: MesloLGS Nerd Font Bold 12px
+font pango: MesloLGL Nerd Font Mono Bold 15
 
 # set the mod key to the winkey:
 set $mod Mod4
@@ -263,7 +263,7 @@ assign [class="eu.betterbird.Betterbird"] $ws7
 # for_window [class=TelegramDesktop] focus
 # for_window [class="xfreerdp"] focus
 # for_window [class="Gimp"] focus
-for_window [class="xfreerdp"] fullscreen
+# for_window [class="xfreerdp"] fullscreen
 
 ##############
 # compositor 
@@ -448,7 +448,7 @@ set $surface0 #363a4f
 set $base #24273a
 set $mantle #1e2030
 set $crust #181926
-set $transparentbase #1e203080 
+set $transparentbase #1e203099 
 
 ##### Transparency table
 # 0 %	   00	#FF000000
