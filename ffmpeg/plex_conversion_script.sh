@@ -75,32 +75,97 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
   CODEC=$(echo "$VIDEO_STREAM_JSON" | jq -r '.codec_name')
   WIDTH=$(echo "$VIDEO_STREAM_JSON" | jq -r '.width')
   HEIGHT=$(echo "$VIDEO_STREAM_JSON" | jq -r '.height')
+  BITDEPTH=$(echo "$VIDEO_STREAM_JSON" | jq -r '.bits_per_raw_sample')
 
   VIDEO_OPTS=""
-  if [[ ("$CODEC" == "h264" || "$CODEC" == "hevc") && (($WIDTH -ge 3840 && $HEIGHT -ge 2160) || ($WIDTH -ge 1920 && $HEIGHT -ge 1080)) ]]; then
-    echo "   [VIDEO]: Criteria met (Codec: $CODEC, Res: ${WIDTH}x${HEIGHT}). Copying stream."
+  if [[ (-n "$BITDEPTH" && (($BITDEPTH -lt 10))) && ("$CODEC" == "h264" || "$CODEC" == "hevc") && (($WIDTH -ge 3840 && $HEIGHT -ge 2160) || ($WIDTH -ge 1920 && $HEIGHT -ge 1080)) ]]; then
+    echo "   [VIDEO]: Criteria met (Codec: $CODEC, Res: ${WIDTH}x${HEIGHT}, BitDepth:${BITDEPTH}). Copying stream."
     VIDEO_OPTS="-c:v copy"
   else
-    echo "   [VIDEO]: Criteria NOT met (Codec: $CODEC, Res: ${WIDTH}x${HEIGHT}). Re-encoding to h264."
+    echo "   [VIDEO]: Criteria NOT met (Codec: $CODEC, Res: ${WIDTH}x${HEIGHT},BitDepth:${BITDEPTH}). Re-encoding to h264."
     VIDEO_OPTS="-c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p"
   fi
 
-  # --- 2. Audio Stream Logic (Corrected and Robust) ---
-  AUDIO_OPTS="-c:a aac -b:a 192k"
-  AUDIO_MAPS=""
+  # # WORKING: --- 2. Audio Stream Logic (Corrected and Robust) ---
+  # AUDIO_OPTS="-c:a aac -b:a 192k"
+  # AUDIO_MAPS=""
+  #
+  # # Use 'first()' for robustness and 'ascii_downcase' for case-insensitivity. The '?' prevents errors on streams without language tags.
+  # JPN_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? | ascii_downcase) == "jpn")) | .index)')
+  # ENG_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? | ascii_downcase) == "eng")) | .index)')
+  #
+  # # *** LESSON LEARNED: Check for the literal string "null" which jq outputs when 'first' finds nothing. ***
+  # if [[ -n "$JPN_AUDIO_INDEX" && "$JPN_AUDIO_INDEX" != "null" ]]; then
+  #   echo "   [AUDIO]: Found Japanese audio stream at index $JPN_AUDIO_INDEX."
+  #   AUDIO_MAPS+="-map 0:$JPN_AUDIO_INDEX "
+  # fi
+  # if [[ -n "$ENG_AUDIO_INDEX" && "$ENG_AUDIO_INDEX" != "null" ]]; then
+  #   echo "   [AUDIO]: Found English audio stream at index $ENG_AUDIO_INDEX."
+  #   AUDIO_MAPS+="-map 0:$ENG_AUDIO_INDEX "
+  # fi
+  #
+  # # Fallback logic only runs if no specific language tracks were found.
+  # if [[ -z "$AUDIO_MAPS" ]]; then
+  #   FIRST_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio") | .index)')
+  #   if [[ -n "$FIRST_AUDIO_INDEX" && "$FIRST_AUDIO_INDEX" != "null" ]]; then
+  #     echo "   [AUDIO]: No JPN/ENG audio found. Falling back to first audio stream at index $FIRST_AUDIO_INDEX."
+  #     AUDIO_MAPS="-map 0:$FIRST_AUDIO_INDEX"
+  #   else
+  #     echo "   [AUDIO]: No audio streams found. No audio will be in the output."
+  #     AUDIO_OPTS="" # No audio options needed if there's no audio to map.
+  #   fi
+  # fi
 
-  # Use 'first()' for robustness and 'ascii_downcase' for case-insensitivity. The '?' prevents errors on streams without language tags.
+  # --- 2. Audio Stream Logic (Final, Robust Version - Corrected for Shell Safety) ---
+  AUDIO_MAPS=""
+  AUDIO_CODEC_OPTS="" # Will hold per-stream options like -c:a:0, -c:a:1
+  audio_stream_counter=0
+
+  # --- STEP 1: Get only the safe index numbers, not the full JSON object ---
   JPN_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? | ascii_downcase) == "jpn")) | .index)')
   ENG_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? | ascii_downcase) == "eng")) | .index)')
 
-  # *** LESSON LEARNED: Check for the literal string "null" which jq outputs when 'first' finds nothing. ***
+  # --- STEP 2: Process Japanese Stream using its safe index ---
   if [[ -n "$JPN_AUDIO_INDEX" && "$JPN_AUDIO_INDEX" != "null" ]]; then
-    echo "   [AUDIO]: Found Japanese audio stream at index $JPN_AUDIO_INDEX."
+    # Go back to the original JSON_PROBE and extract the channels using the index.
+    # This is safe because JPN_AUDIO_INDEX is just a number. The 'jq' default '// 2' is reliable here.
+    channels=$(echo "$JSON_PROBE" | jq -r ".streams[$JPN_AUDIO_INDEX].channels // 2")
+
+    echo "   [AUDIO]: Found Japanese audio at index $JPN_AUDIO_INDEX ($channels channels)."
     AUDIO_MAPS+="-map 0:$JPN_AUDIO_INDEX "
+
+    if ((channels >= 6)); then
+      echo "     - Action: Setting JPN track to 5.1 AAC (384k)."
+      AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 384k -ac:a:$audio_stream_counter 6 "
+    else
+      echo "     - Action: Setting JPN track to Stereo AAC (192k)."
+      AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 192k -ac:a:$audio_stream_counter 2 "
+    fi
+    echo " -- INCREASING audio_streamer_counter by 1 -- "
+    audio_stream_counter=$((audio_stream_counter + 1))
+    echo " -- audio_streamer_counter is now $audio_stream_counter -- "
+
   fi
+
+  # --- STEP 3: Process English Stream using its safe index ---
+
   if [[ -n "$ENG_AUDIO_INDEX" && "$ENG_AUDIO_INDEX" != "null" ]]; then
-    echo "   [AUDIO]: Found English audio stream at index $ENG_AUDIO_INDEX."
+    # Go back to the original JSON_PROBE for channel info.
+    channels=$(echo "$JSON_PROBE" | jq -r ".streams[$ENG_AUDIO_INDEX].channels // 2")
+
+    echo "   [AUDIO]: Found English audio at index $ENG_AUDIO_INDEX ($channels channels)."
     AUDIO_MAPS+="-map 0:$ENG_AUDIO_INDEX "
+
+    if ((channels >= 6)); then
+      echo "     - Action: Setting ENG track to 5.1 AAC (384k)."
+      AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 384k -ac:a:$audio_stream_counter 6 "
+    else
+      echo "     - Action: Setting ENG track to Stereo AAC (192k)."
+      AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 192k -ac:a:$audio_stream_counter 2 "
+    fi
+
+    audio_stream_counter=$((audio_stream_counter + 1))
+
   fi
 
   # Fallback logic only runs if no specific language tracks were found.
@@ -109,9 +174,10 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
     if [[ -n "$FIRST_AUDIO_INDEX" && "$FIRST_AUDIO_INDEX" != "null" ]]; then
       echo "   [AUDIO]: No JPN/ENG audio found. Falling back to first audio stream at index $FIRST_AUDIO_INDEX."
       AUDIO_MAPS="-map 0:$FIRST_AUDIO_INDEX"
+      AUDIO_CODEC_OPTS="-c:a aac -b:a 192k -ac 2"
     else
       echo "   [AUDIO]: No audio streams found. No audio will be in the output."
-      AUDIO_OPTS="" # No audio options needed if there's no audio to map.
+      AUDIO_CODEC_OPTS=""
     fi
   fi
 
@@ -121,7 +187,8 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
   # A counter to apply codec options to the correct output subtitle stream (s:0, s:1, etc.)
   image_sub_counter=0
 
-  ENG_SUB_STREAMS_JSON=$(echo "$JSON_PROBE" | jq '[.streams[] | select(.codec_type=="subtitle" and ((.tags.language? | ascii_downcase) == "eng"))]')
+  # ENG_SUB_STREAMS_JSON=$(echo "$JSON_PROBE" | jq '[.streams[] | select(.codec_type=="subtitle" and ((.tags.language? | ascii_downcase) == "eng" ))]')
+  ENG_SUB_STREAMS_JSON=$(echo "$JSON_PROBE" | jq '[.streams[] | select(.codec_type=="subtitle" and ((.tags.language? | ascii_downcase) == "eng" or (.tags.language? | ascii_downcase) == "jpn"))]')
   NUM_ENG_SUBS=$(echo "$ENG_SUB_STREAMS_JSON" | jq 'length')
   if ((NUM_ENG_SUBS > 0)); then
     echo "   [SUBTITLE]: Found $NUM_ENG_SUBS English subtitle track(s). Processing all..."
@@ -136,13 +203,15 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
         # Append a map command for EACH image sub found.
         # Apply the codec option to the specific output stream using the counter.
         SUBTITLE_MAPS_FOR_MKV+="-map 0:$current_index -c:s:$image_sub_counter copy "
-        ((image_sub_counter++)) # Increment the counter for the next image sub.
+        image_sub_counter=$((image_sub_counter + 1)) # Increment the counter for the next image sub.
+        # ((image_sub_counter++))
+        # audio_stream_counter=$((audio_stream_counter + 1))
 
       else
         # --- Logic for Text-Based Subs ---
         current_title=$(echo "$sub_stream_json" | jq -r '.tags.title? // "track'$current_index'"')
         sanitized_suffix=$(echo "$current_title" | tr '[:upper:]' '[:lower:]' | tr -d '()' | tr -s '[:space:]/' '_' | sed 's/__*/_/g')
-        OUTPUT_FILE_SRT="$OUTPUT_DIR/${FILE_NAME_NO_EXT}.eng.${sanitized_suffix}.srt"
+        OUTPUT_FILE_SRT="$OUTPUT_DIR/${FILE_NAME_NO_EXT}.${sanitized_suffix}.eng.srt"
         echo "     - Action: Extracting and sanitizing text-based sub at index $current_index to:"
         echo "       $OUTPUT_FILE_SRT"
 
@@ -153,10 +222,24 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
     echo "   [SUBTITLE]: No English subtitle stream found."
   fi
 
+  # WORKING: --- Assemble and Execute the MKV Conversion ---
+  # echo "   Building final MKV conversion command..."
+  # COMMAND=(ffmpeg -nostdin -hide_banner -v error -stats -i "$SOURCE_FILE" -map 0:v:0 ${VIDEO_OPTS})
+  # if [[ -n "$AUDIO_MAPS" ]]; then COMMAND+=($AUDIO_MAPS $AUDIO_OPTS); fi
+  # # Only add subtitle mapping to the MKV command if an image-based sub was found
+  # if [[ -n "$SUBTITLE_MAPS_FOR_MKV" ]]; then COMMAND+=($SUBTITLE_MAPS_FOR_MKV); fi
+  # COMMAND+=(-y "$OUTPUT_FILE_MKV")
+  #
+  # echo "   Executing: ${COMMAND[*]}"
+  # if "${COMMAND[@]}"; then echo "   SUCCESS: MKV file created successfully."; else echo "   !! FFMPEG ERROR: MKV conversion failed." >&2; fi
+
   # --- Assemble and Execute the MKV Conversion ---
   echo "   Building final MKV conversion command..."
   COMMAND=(ffmpeg -nostdin -hide_banner -v error -stats -i "$SOURCE_FILE" -map 0:v:0 ${VIDEO_OPTS})
-  if [[ -n "$AUDIO_MAPS" ]]; then COMMAND+=($AUDIO_MAPS $AUDIO_OPTS); fi
+
+  # THIS IS THE CORRECTED LINE THAT USES THE NEW VARIABLE
+  if [[ -n "$AUDIO_MAPS" ]]; then COMMAND+=($AUDIO_MAPS $AUDIO_CODEC_OPTS); fi
+
   # Only add subtitle mapping to the MKV command if an image-based sub was found
   if [[ -n "$SUBTITLE_MAPS_FOR_MKV" ]]; then COMMAND+=($SUBTITLE_MAPS_FOR_MKV); fi
   COMMAND+=(-y "$OUTPUT_FILE_MKV")
