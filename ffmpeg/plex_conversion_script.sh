@@ -34,15 +34,12 @@ echo "--- Acknowledged. Building with care and precision. Starting process in: $
 # --- Main Logic: Find and process all video files ---
 # Using find piped to a while-read loop is the most robust way to handle all possible filenames.
 # find "$INPUT_ROOT_DIR" -type f | while IFS= read -r SOURCE_FILE; do
-find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= read -r SOURCE_FILE; do
+find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | sort -k1 | cut -f2 | while IFS= read -r SOURCE_FILE; do
 
   # Use ffprobe to reliably identify video files, not extensions. Stderr is silenced for non-video files.
   if ! ffprobe -v error -select_streams v:0 -show_entries stream=codec_type "$SOURCE_FILE" 2>/dev/null | grep -q "codec_type=video"; then
     continue # This is not a video file, skip it silently.
   fi
-
-  echo "------------------------------------------------------------------"
-  echo ">> Processing video: $SOURCE_FILE"
 
   # --- Prepare all paths and names ---
   DIR_NAME=$(dirname "$SOURCE_FILE")
@@ -50,6 +47,9 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
   FILE_NAME_NO_EXT="${BASE_NAME%.*}"
   OUTPUT_DIR="$DIR_NAME/converted"
   OUTPUT_FILE_MKV="$OUTPUT_DIR/${FILE_NAME_NO_EXT}.mkv"
+
+  echo "==============================================================="
+  echo ">> Processing video: [ $FILE_NAME_NO_EXT ]"
 
   if [ -f "$OUTPUT_FILE_MKV" ]; then
     echo "   [SKIP]: Output file already exists."
@@ -121,9 +121,13 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
   AUDIO_CODEC_OPTS="" # Will hold per-stream options like -c:a:0, -c:a:1
   audio_stream_counter=0
 
+  echo "getting ready for step 1..."
   # --- STEP 1: Get only the safe index numbers, not the full JSON object ---
-  JPN_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? | ascii_downcase) == "jpn")) | .index)')
-  ENG_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? | ascii_downcase) == "eng")) | .index)')
+  # JPN_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? | ascii_downcase) == "jpn")) | .index)')
+  # ENG_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? | ascii_downcase) == "eng")) | .index)')
+
+  JPN_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? // "" | ascii_downcase) == "jpn")) | .index)')
+  ENG_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? // "" | ascii_downcase) == "eng")) | .index)')
 
   # --- STEP 2: Process Japanese Stream using its safe index ---
   if [[ -n "$JPN_AUDIO_INDEX" && "$JPN_AUDIO_INDEX" != "null" ]]; then
@@ -141,10 +145,6 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -print | while IFS= r
       echo "     - Action: Setting JPN track to Stereo AAC (192k)."
       AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 192k -ac:a:$audio_stream_counter 2 "
     fi
-    echo " -- INCREASING audio_streamer_counter by 1 -- "
-    audio_stream_counter=$((audio_stream_counter + 1))
-    echo " -- audio_streamer_counter is now $audio_stream_counter -- "
-
   fi
 
   # --- STEP 3: Process English Stream using its safe index ---
