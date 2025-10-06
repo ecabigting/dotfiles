@@ -83,13 +83,12 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
   fi
 
   VIDEO_OPTS=""
-  if [[ ($BITDEPTH -lt 10) && ("$CODEC" == "h264" || "$CODEC" == "hevc") && (($WIDTH -ge 3840 && $HEIGHT -ge 2160) || ($WIDTH -ge 1920 && $HEIGHT -ge 1080)) ]]; then
-    echo "   [VIDEO]: Criteria met (Codec: $CODEC, Res: ${WIDTH}x${HEIGHT}, BitDepth:${BITDEPTH}). Copying stream."
-    VIDEO_OPTS="-c:v copy"
-  else
-    echo "   [VIDEO]: Criteria NOT met (Codec: $CODEC, Res: ${WIDTH}x${HEIGHT}, BitDepth:${BITDEPTH}). Re-encoding to h264."
-    VIDEO_OPTS="-c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p"
-  fi
+  TARGET_WIDTH=1280
+  TARGET_HEIGHT=720
+  # Optional step to maintain aspect ratio
+  SCALE_OPT="-vf scale='min($TARGET_WIDTH,iw)':-2"
+  # iPhone video profile settings, targeting compatibility and size
+  VIDEO_OPTS="-c:v h264_nvenc -preset slow -crf 27 -pix_fmt yuv420p -profile:v high -level:v 4.1 $SCALE_OPT"
 
   # # WORKING: --- 2. Audio Stream Logic (Corrected and Robust) ---
   # AUDIO_OPTS="-c:a aac -b:a 192k"
@@ -254,6 +253,7 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
   end_time=$(date +%s) # Capture end in seconds
   elapsed=$((end_time - start_time))
   echo "Elapsed time for $FILE_NAME_NO_EXT: ${elapsed} seconds"
+
 done
 
 echo "--- All tasks are complete. ---"
