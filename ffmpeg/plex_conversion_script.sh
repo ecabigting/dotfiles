@@ -29,7 +29,7 @@ if [ ! -d "$INPUT_ROOT_DIR" ]; then
   exit 1
 fi
 
-echo "--- Acknowledged. Building with care and precision. Starting process in: $INPUT_ROOT_DIR ---"
+echo "--- Starting process in: $INPUT_ROOT_DIR ---"
 
 # --- Main Logic: Find and process all video files ---
 # Using find piped to a while-read loop is the most robust way to handle all possible filenames.
@@ -123,7 +123,8 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
 
   # --- 2. Audio Stream Logic (Final, Robust Version - Corrected for Shell Safety) ---
   AUDIO_MAPS=""
-  AUDIO_CODEC_OPTS="" # Will hold per-stream options like -c:a:0, -c:a:1
+  AUDIO_CODEC_OPTS=""    # Will hold per-stream options like -c:a:0, -c:a:1
+  AUDIO_METADATA_OPTS="" # Add this line
   audio_stream_counter=0
 
   # --- STEP 1: Get only the safe index numbers, not the full JSON object ---
@@ -132,6 +133,31 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
 
   JPN_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? // "" | ascii_downcase) == "jpn")) | .index)')
   ENG_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? // "" | ascii_downcase) == "eng")) | .index)')
+  KOR_AUDIO_INDEX=$(echo "$JSON_PROBE" | jq 'first(.streams[] | select(.codec_type=="audio" and ((.tags.language? // "" | ascii_downcase) == "kor")) | .index)')
+
+  # --- STEP 2.0: Process Korean Stream using its safe index ---
+  if [[ -n "$KOR_AUDIO_INDEX" && "$KOR_AUDIO_INDEX" != "null" ]]; then
+    # Go back to the original JSON_PROBE and extract the channels using the index.
+    # This is safe because KOR_AUDIO_INDEX is just a number. The 'jq' default '// 2' is reliable here.
+    channels=$(echo "$JSON_PROBE" | jq -r ".streams[$KOR_AUDIO_INDEX].channels // 2")
+
+    echo "   [AUDIO]: Found Korean audio at index $KOR_AUDIO_INDEX ($channels channels)."
+    AUDIO_MAPS+="-map 0:$KOR_AUDIO_INDEX "
+
+    if ((channels >= 6)); then
+      echo "     - Action: Setting KOR track to 5.1 AAC (384k)."
+      AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 384k -ac:a:$audio_stream_counter 6 "
+    else
+      echo "     - Action: Setting KOR track to Stereo AAC (192k)."
+      AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 192k -ac:a:$audio_stream_counter 2 "
+    fi
+
+    echo "     - Action: Setting KOR track title to 'Korean'."
+    AUDIO_METADATA_OPTS+="-metadata:s:a:$audio_stream_counter title=\"Korean\" "
+
+    audio_stream_counter=$((audio_stream_counter + 1))
+
+  fi
 
   # --- STEP 2: Process Japanese Stream using its safe index ---
   if [[ -n "$JPN_AUDIO_INDEX" && "$JPN_AUDIO_INDEX" != "null" ]]; then
@@ -149,6 +175,12 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
       echo "     - Action: Setting JPN track to Stereo AAC (192k)."
       AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 192k -ac:a:$audio_stream_counter 2 "
     fi
+
+    echo "     - Action: Setting JPN track title to 'Japanese'."
+    AUDIO_METADATA_OPTS+="-metadata:s:a:$audio_stream_counter title=\"Japanese\" "
+
+    audio_stream_counter=$((audio_stream_counter + 1))
+
   fi
 
   # --- STEP 3: Process English Stream using its safe index ---
@@ -168,6 +200,9 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
       AUDIO_CODEC_OPTS+="-c:a:$audio_stream_counter aac -b:a:$audio_stream_counter 192k -ac:a:$audio_stream_counter 2 "
     fi
 
+    # --- Add the title for the English stream ---
+    echo "     - Action: Setting ENG track title to 'English'."
+    AUDIO_METADATA_OPTS+="-metadata:s:a:$audio_stream_counter title=\"English\" "
     audio_stream_counter=$((audio_stream_counter + 1))
 
   fi
@@ -179,6 +214,8 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
       echo "   [AUDIO]: No JPN/ENG audio found. Falling back to first audio stream at index $FIRST_AUDIO_INDEX."
       AUDIO_MAPS="-map 0:$FIRST_AUDIO_INDEX"
       AUDIO_CODEC_OPTS="-c:a aac -b:a 192k -ac 2"
+      # Optional: Add a generic title for the fallback stream
+      AUDIO_METADATA_OPTS="-metadata:s:a:0 title=\"Audio\" "
     else
       echo "   [AUDIO]: No audio streams found. No audio will be in the output."
       AUDIO_CODEC_OPTS=""
@@ -242,7 +279,7 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
   COMMAND=(ffmpeg -nostdin -hide_banner -v error -stats -i "$SOURCE_FILE" -map 0:v:0 ${VIDEO_OPTS})
 
   # THIS IS THE CORRECTED LINE THAT USES THE NEW VARIABLE
-  if [[ -n "$AUDIO_MAPS" ]]; then COMMAND+=($AUDIO_MAPS $AUDIO_CODEC_OPTS); fi
+  if [[ -n "$AUDIO_MAPS" ]]; then COMMAND+=($AUDIO_MAPS $AUDIO_CODEC_OPTS $AUDIO_METADATA_OPTS); fi
 
   # Only add subtitle mapping to the MKV command if an image-based sub was found
   if [[ -n "$SUBTITLE_MAPS_FOR_MKV" ]]; then COMMAND+=($SUBTITLE_MAPS_FOR_MKV); fi
