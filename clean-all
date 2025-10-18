@@ -34,6 +34,12 @@ npm cache clear --force
 echo "Cleaning _npx/ folder"
 rm -rf ~/.npm/_npx/*
 
+## clear coredumps
+echo "==================================================="
+echo "============== Cleaning coredumps ================="
+echo "==================================================="
+sudo rm /var/lib/systemd/coredump/*
+
 # rust,cargo
 echo "==================================================="
 echo "============ Clean cargo registry.. ==============="
