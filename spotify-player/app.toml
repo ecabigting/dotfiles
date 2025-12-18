@@ -18,7 +18,7 @@ enable_streaming = "Always"
 enable_notify = true
 enable_cover_image_cache = true
 notify_streaming_only = false
-default_device = "spotify-player"
+default_device = "spotify-on-dorneHost"
 play_icon = ""
 pause_icon = ""
 liked_icon = "♥"
@@ -27,17 +27,17 @@ liked_icon = "♥"
 seek_duration_secs = 5
 
 [device]
-name = "sportify-on-dorneHost"
+name = "spotify-on-dorneHost"
 device_type = "speaker"
-volume = 70
+volume = 80
 bitrate = 320
-audio_cache = true
+audio_cache = false
 normalization = true
 autoplay = false
 shuffle = true
 repeat = true
 
 [layout]
-library = { playlist_percent = 40, album_percent = 40 }
+library = { playlist_percent = 69, album_percent = 0, artist_percent = 30 }
 playback_window_position = "Top"
 playback_window_height = 5

@@ -22,6 +22,34 @@ bright_cyan = "bright_cyan"
 bright_white = "bright_white"
 
 [[themes]]
+name = "tokyonight"
+[themes.palette]
+# background = "#1f2335"
+foreground = "#c0caf5"
+black = "#414868"
+red = "#f7768e"
+green = "#9ece6a"
+yellow = "#e0af68"
+blue = "#2ac3de"
+magenta = "#bb9af7"
+cyan = "#7dcfff"
+white = "#eee8d5"
+bright_black = "#24283b"
+bright_red = "#ff4499"
+bright_green = "#73daca"
+bright_yellow = "#657b83"
+bright_blue = "#839496"
+bright_magenta = "#ff007c"
+bright_cyan = "#93a1a1"
+bright_white = "#fdf6e3"
+[themes.component_style]
+like = { fg = "Red", modifiers = ["Bold"] }
+selection = { bg = "Black", fg = "White", modifiers = ["Bold"] }
+secondary_row = { bg = "#677075" }
+playback_metadata = { fg = "BrightCyan",modifiers = ["RapidBlink"] }
+playlist_desc = { fg = "BrightCyan"}
+
+[[themes]]
 name = "dracula"
 [themes.palette]
 # background = "#1e1f29"
@@ -157,35 +185,6 @@ bright_blue = "#839496"
 bright_magenta = "#6c71c4"
 bright_cyan = "#93a1a1"
 bright_white = "#fdf6e3"
-
-[[themes]]
-name = "tokyonight"
-[themes.palette]
-# background = "#1f2335"
-foreground = "#c0caf5"
-black = "#414868"
-red = "#f7768e"
-green = "#9ece6a"
-yellow = "#e0af68"
-blue = "#2ac3de"
-magenta = "#bb9af7"
-cyan = "#7dcfff"
-white = "#eee8d5"
-bright_black = "#24283b"
-bright_red = "#ff4499"
-bright_green = "#73daca"
-bright_yellow = "#657b83"
-bright_blue = "#839496"
-bright_magenta = "#ff007c"
-bright_cyan = "#93a1a1"
-bright_white = "#fdf6e3"
-[themes.component_style]
-like = { fg = "Red", modifiers = ["Bold"] }
-selection = { bg = "Black", fg = "White", modifiers = ["Bold"] }
-secondary_row = { bg = "#677075" }
-playback_metadata = { fg = "White" }
-playlist_desc = { fg = "BrightCyan"}
-
 
 [[themes]]
 name = "catppuccin_latte"
