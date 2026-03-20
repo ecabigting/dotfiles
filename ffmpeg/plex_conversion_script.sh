@@ -239,15 +239,15 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
       SUB_CODEC=$(echo "$sub_stream_json" | jq -r '.codec_name')
 
       # --- Logic for ALL image-based subs ---
+      echo "Subtitle Codec Found: $SUB_CODEC on index $current_index"
       if [[ "$SUB_CODEC" == "hdmv_pgs_subtitle" || "$SUB_CODEC" == "dvd_subtitle" ]]; then
-        echo "     - Action: Found image-based sub at index $current_index. Mapping it to be copied."
-        # Append a map command for EACH image sub found.
-        # Apply the codec option to the specific output stream using the counter.
-        SUBTITLE_MAPS_FOR_MKV+="-map 0:$current_index -c:s:$image_sub_counter copy "
-        image_sub_counter=$((image_sub_counter + 1)) # Increment the counter for the next image sub.
-        # ((image_sub_counter++))
-        # audio_stream_counter=$((audio_stream_counter + 1))
+        # echo "     - Action: Found image-based sub at index $current_index. Mapping it to be copied."
+        # SUBTITLE_MAPS_FOR_MKV+="-map 0:$current_index -c:s:$image_sub_counter copy "
+        # image_sub_counter=$((image_sub_counter + 1)) # Increment the counter for the next image sub.
 
+        # echo "     - Action: Found image-based sub at index $current_index. Mapping it to be copied."
+        echo "      - FOUND IMAGE BASE SUB. DO NOTHING. Details: "
+        echo "           - Subtitle Codec Found: $SUB_CODEC on index $current_index"
       else
         # --- Logic for Text-Based Subs ---
         current_title=$(echo "$sub_stream_json" | jq -r '.tags.title? // "track'$current_index'"')
