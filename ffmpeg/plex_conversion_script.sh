@@ -83,7 +83,7 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
   fi
 
   VIDEO_OPTS=""
-  if [[ ($BITDEPTH -lt 10) && ("$CODEC" == "h264" || "$CODEC" == "hevc") && (($WIDTH -ge 3840 && $HEIGHT -ge 2160) || ($WIDTH -ge 1920 && $HEIGHT -ge 1080)) ]]; then
+  if [[ "$CODEC" == "h264" && BITDEPTH -lt 10 && (($WIDTH -ge 3840 && $HEIGHT -ge 2160) || ($WIDTH -ge 1920 && $HEIGHT -ge 1080)) ]]; then
     echo "   [VIDEO]: Criteria met (Codec: $CODEC, Res: ${WIDTH}x${HEIGHT}, BitDepth:${BITDEPTH}). Copying stream."
     VIDEO_OPTS="-c:v copy"
   else
