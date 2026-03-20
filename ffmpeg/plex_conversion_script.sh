@@ -35,7 +35,8 @@ echo "--- Starting process in: $INPUT_ROOT_DIR ---"
 # Using find piped to a while-read loop is the most robust way to handle all possible filenames.
 # find "$INPUT_ROOT_DIR" -type f | while IFS= read -r SOURCE_FILE; do
 find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | sort -k1 | cut -f2 | while IFS= read -r SOURCE_FILE; do
-  start_time=$(date +%s) # Capture start in seconds
+  start_time=$(date +%s)
+  start_time_human=$(date '+%Y-%m-%d %H:%M:%S')
   # Use ffprobe to reliably identify video files, not extensions. Stderr is silenced for non-video files.
   if ! ffprobe -v error -select_streams v:0 -show_entries stream=codec_type "$SOURCE_FILE" 2>/dev/null | grep -q "codec_type=video"; then
     continue # This is not a video file, skip it silently.
@@ -288,8 +289,11 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
   echo "   Executing: ${COMMAND[*]}"
   if "${COMMAND[@]}"; then echo "   SUCCESS: MKV file created successfully."; else echo "   !! FFMPEG ERROR: MKV conversion failed." >&2; fi
 
-  end_time=$(date +%s) # Capture end in seconds
+  end_time=$(date +%s)
+  end_time_human=$(date '+%Y-%m-%d %H:%M:%S')
   elapsed=$((end_time - start_time))
+  echo "Started: $start_time_human"
+  echo "Finished: $end_time_human"
   echo "Elapsed time for $FILE_NAME_NO_EXT: ${elapsed} seconds"
 done
 
