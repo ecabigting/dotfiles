@@ -25,6 +25,7 @@ liked_icon = "♥"
 # cover_img_length = 9
 # cover_img_width = 5
 seek_duration_secs = 5
+enable_audio_visualization = true
 
 [device]
 name = "spotify-on-dorneHost"
