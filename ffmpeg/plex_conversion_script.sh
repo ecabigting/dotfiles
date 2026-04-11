@@ -6,19 +6,13 @@ set -euo pipefail
 
 # --- Prerequisite Check: Ensure required tools are installed ---
 # This prevents cryptic errors later by checking for dependencies first.
-for cmd in ffmpeg ffprobe jq nice; do
+for cmd in ffmpeg ffprobe jq; do
   if ! command -v "$cmd" &>/dev/null; then
     echo "!! CRITICAL ERROR: Required command '$cmd' is not installed." >&2
     echo "!! Please install it to proceed. On Debian/Ubuntu: sudo apt install ffmpeg jq" >&2
     exit 1
   fi
 done
-
-# --- Throttling Configuration ---
-# THREADS: Limit number of CPU threads (e.g., 1 or 2). 0 = auto (uses all cores).
-# PRIORITY: 'nice' value (19 is lowest priority, 0 is normal).
-THREADS=2
-PRIORITY=19
 
 # --- Input Validation: Check for exactly one directory argument ---
 if [ "$#" -ne 1 ]; then
@@ -263,7 +257,7 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
         echo "     - Action: Extracting and sanitizing text-based sub at index $current_index to:"
         echo "       $OUTPUT_FILE_SRT"
 
-        nice -n $PRIORITY ffmpeg -threads $THREADS -nostdin -hide_banner -v error -i "$SOURCE_FILE" -map "0:$current_index" -f srt -y - 2>/dev/null | sed 's/<[^>]*>//g' >"$OUTPUT_FILE_SRT"
+        ffmpeg -nostdin -hide_banner -v error -i "$SOURCE_FILE" -map "0:$current_index" -f srt -y - 2>/dev/null | sed 's/<[^>]*>//g' >"$OUTPUT_FILE_SRT"
       fi
     done < <(echo "$ENG_SUB_STREAMS_JSON" | jq -c '.[]')
   else
@@ -272,7 +266,7 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
 
   # WORKING: --- Assemble and Execute the MKV Conversion ---
   # echo "   Building final MKV conversion command..."
-  # COMMAND=(nice -n $PRIORITY ffmpeg -threads $THREADS -nostdin -hide_banner -v error -stats -i "$SOURCE_FILE" -map 0:v:0 ${VIDEO_OPTS})
+  # COMMAND=(ffmpeg -nostdin -hide_banner -v error -stats -i "$SOURCE_FILE" -map 0:v:0 ${VIDEO_OPTS})
   # if [[ -n "$AUDIO_MAPS" ]]; then COMMAND+=($AUDIO_MAPS $AUDIO_OPTS); fi
   # # Only add subtitle mapping to the MKV command if an image-based sub was found
   # if [[ -n "$SUBTITLE_MAPS_FOR_MKV" ]]; then COMMAND+=($SUBTITLE_MAPS_FOR_MKV); fi
@@ -283,7 +277,7 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
 
   # --- Assemble and Execute the MKV Conversion ---
   echo "   Building final MKV conversion command..."
-  COMMAND=(nice -n $PRIORITY ffmpeg -threads $THREADS -nostdin -hide_banner -v error -stats -i "$SOURCE_FILE" -map 0:v:0 ${VIDEO_OPTS})
+  COMMAND=(ffmpeg -nostdin -hide_banner -v error -stats -i "$SOURCE_FILE" -map 0:v:0 ${VIDEO_OPTS})
 
   # THIS IS THE CORRECTED LINE THAT USES THE NEW VARIABLE
   if [[ -n "$AUDIO_MAPS" ]]; then COMMAND+=($AUDIO_MAPS $AUDIO_CODEC_OPTS $AUDIO_METADATA_OPTS); fi
