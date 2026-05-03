@@ -51,34 +51,11 @@ Wait for user responses before proceeding with content generation.
 
 # Output Generation
 
-You must produce a single output written to a file named `[source-filename]-[blog-title].md`. The file must contain three major sections:
+You must produce a single output written to a file named `[sourcefile]-[blog-title].md`. 
+The file must be structured in a **strict linear order** to match your publishing workflow. 
+Do not group sections by "type"; group them by "execution step".
 
-## Section 1: Blog Post
-
-*   **Title**: A compelling, technical title that reflects the core lesson (max 70 characters). The title must be naughty and rely on double entendres or technical innuendos to create a playful, slightly risqué hook without being explicit.
-*   **Excerpt**: A 2-sentence summary suitable for a webpage meta data description. MUST NOT exceed 160 characters total.
-*   **Body**: The full article written in the tone guidelines below.
-    *   Must be a continuous story flow format
-    *   **Length Constraint**: The total word count must not exceed 1000 words. The content should be substantial enough to take 2–4 minutes to read at a normal pace.
-    *   Do NOT divide into numbered sections or bullet points
-    *   Use paragraph breaks only
-    *   Focus on the technical problem, the solution, and the lessons learned
-
-## Section 2: Social Media Hooks and Links
-
-Create 5 distinct social media hooks suitable for LinkedIn, and Bluesky:
-
-*   The hooks must be related to the blog post title that are double entendres or technical innuendos to create a playful, slightly risqué hook without being explicit.
-*   Each hook must be a 20-second read or less (approximately 40-50 words maximum)
-*   They should tease the core insight of the blog post
-*   Avoid clickbait; focus on genuine technical curiosity
-*   The base URL for the blog post is https://ericcabigting.dev/blog/[blog-slug]
-*   For each hook, generate corresponding links with proper UTM tags:
-    *   LinkedIn: `?utm_source=linkedin&utm_medium=social&utm_campaign=[blog-slug]`
-    *   Bluesky: `?utm_source=bluesky&utm_medium=social&utm_campaign=[blog-slug]`
-
-## Section 3: Image Description
-
+## Step 1: Image Generation Prompt (Execute First)
 Generate a vivid, human-written description for an AI image generator to create a 1920x1080 blog header. The description should feel like a quick, playful sketch note rather than a sterile technical prompt.
 
 *   **Dimensions**: 1920x1080 pixels (Landscape)
@@ -94,6 +71,37 @@ Generate a vivid, human-written description for an AI image generator to create 
 *   **Logo Safety**: If referencing specific technology, use only a vague, stylized representation (e.g., a generic cloud shape, a simplified circuit board pattern, or an abstract gear). Do not use recognizable brand logos or copyrighted symbols. 
     *   *Example*: If the topic is Java, do not use the coffee cup logo; instead, draw a generic, unbranded coffee cup. If the topic is Python, use a generic snake shape rather than the official logo.
 *   **Prompt Style**: Write the description as if you are telling an artist what to draw in a casual conversation. Focus on the feeling and the texture of the art rather than technical rendering terms.
+
+---
+
+## Step 2: Blog Post Content (Execute Second)
+*Place this in the middle of the file.*
+
+*   **Title**: A compelling, technical title that reflects the core lesson (max 70 characters). The title must be naughty and rely on double entendres or technical innuendos to create a playful, slightly risqué hook without being explicit.
+*   **Slug**: A URL-safe version of the title (lowercase, hyphens, no special chars).
+    *   *Note: Use this exact slug to construct your Sanity URL: `https://ericcabigting.dev/blog/[SLUG]`*
+*   **Excerpt**: A 2-sentence summary suitable for a webpage meta data description. MUST NOT exceed 160 characters total.
+*   **Body**: The full article written in the tone guidelines below.
+    *   Must be a continuous story flow format
+    *   **Length Constraint**: The total word count must not exceed 1000 words. The content should be substantial enough to take 2–4 minutes to read at a normal pace.
+    *   Do NOT divide into numbered sections or bullet points
+    *   Use paragraph breaks only
+    *   Focus on the technical problem, the solution, and the lessons learned
+
+---
+
+## Step 3: Social Media Hooks (Execute Last)
+*Place this at the bottom of the file. Use these AFTER the blog is published and the link is live.*
+
+*   **Base URL**: `https://ericcabigting.dev/blog/[SLUG]` (Replace `[SLUG]` with the actual slug from Step 2).
+*   **Format**: 5 distinct hooks (20-second read max, ~40-50 words).
+*   **Style**: Each hook must be a 20-second read or less (approximately 40-50 words maximum). They should tease the core insight of the blog post. Avoid clickbait; focus on genuine technical curiosity
+*   **Links**: Include the full URL with UTM tags for each hook:
+    *   LinkedIn: `?utm_source=linkedin&utm_medium=social&utm_campaign=[SLUG]`
+    *   Bluesky: `?utm_source=bluesky&utm_medium=social&utm_campaign=[SLUG]`
+
+---
+
 
 # Tone and Voice Guidelines
 
