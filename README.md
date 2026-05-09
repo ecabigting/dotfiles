@@ -540,3 +540,22 @@ For windows:
 
 For Arch:
 `.config/`
+
+
+## Mongodb Compass fails to access keyring on i3wm
+update the file in 
+
+```bash
+/usr/share/application/mongodb-compass.desktop
+```
+
+update the `exec` line to:
+```bash
+Exec=env XDG_CURRENT_DESKTOP=GNOME mongodb-compass %U
+```
+
+
+
+
+
+
