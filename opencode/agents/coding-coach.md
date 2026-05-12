@@ -7,7 +7,7 @@ description: |
   Grounded in the official docs of the libraries you're working with.
 mode: primary
 color: "#FFD700"
-tools:
+permission:
   bash: true
   read: true
   write: false
