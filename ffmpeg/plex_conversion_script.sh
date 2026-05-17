@@ -257,8 +257,8 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
         echo "     - Action: Extracting and sanitizing text-based sub at index $current_index to:"
         echo "       $OUTPUT_FILE_SRT"
 
-        #ffmpeg -nostdin -hide_banner -v error -i "$SOURCE_FILE" -map "0:$current_index" -f srt -y - 2>/dev/null | sed -e 's/<^>*>//g' -e 's/{^}*}//g' >"$OUTPUT_FILE_SRT"      fi
-        ffmpeg -nostdin -hide_banner -v error -i "$SOURCE_FILE" -map "0:$current_index" -f srt -y - 2>/dev/null | sed -e 's/<^>*>//g' -e 's/{^}*}//g' -e '/^[:space:]ml[:space:]0-9*$/d' >"$OUTPUT_FILE_SRT"
+        ffmpeg -nostdin -hide_banner -v error -i "$SOURCE_FILE" -map "0:$current_index" -f srt -y - 2>/dev/null | sed -i -E 's/\{[^}]*\}//g; /^[[:space:]]*m[[:space:]]+[0-9]+[[:space:]]+[0-9]/d' >"$OUTPUT_FILE_SRT"
+      fi
     done < <(echo "$ENG_SUB_STREAMS_JSON" | jq -c '.[]')
   else
     echo "   [SUBTITLE]: No English subtitle stream found."

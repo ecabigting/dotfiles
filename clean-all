@@ -46,6 +46,11 @@ echo "============ Clean cargo registry.. ==============="
 echo "==================================================="
 rm -rf ~/.cargo/registry/*
 echo "==================================================="
+echo "===== Clean cargo git checkouts and db. ==========="
+echo "==================================================="
+rm -rf ~/.cargo/git/checkouts/
+rm -rf ~/.cargo/git/db/
+echo "==================================================="
 echo "=== Cleaning docker containers,images,volumes.. ==="
 echo "==================================================="
 docker system prune -af
