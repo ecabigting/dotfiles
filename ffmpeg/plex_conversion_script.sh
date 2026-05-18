@@ -228,7 +228,7 @@ find "$INPUT_ROOT_DIR" -name "converted" -prune -o -type f -printf '%f\t%p\n' | 
               s/<[^>]*>//g
               s/\\h/ /g
               s/\\[nN]/ /g
-              /^[[:space:]]*[mnlbscp][[:space:]]+-?[0-9]+[[:space:]]+-?[0-9]+/d
+               /^[[:space:]]*[mnlbscp][[:space:]]+-?[0-9]+(\.[0-9]+)?[[:space:]]+-?[0-9]+(\.[0-9]+)?/d
             ' >"$OUTPUT_FILE_SRT"
         srt_exit=${PIPESTATUS[0]}
         set -o pipefail

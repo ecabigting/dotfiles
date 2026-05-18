@@ -106,7 +106,7 @@ SRT naming: `MovieName.eng.srt`, `MovieName.jpn.srt`, `MovieName.eng.2.srt` etc.
 ### Subtitles
 - **ASS → SRT extraction is the safest path.** Samsung Plex renders ASS flat (or glitches). SRT is universally supported.
 - **ffmpeg's ASS→SRT conversion injects HTML tags** (`<b>`, `<i>`, `<font ...>`) from ASS styling. These must be stripped — Samsung Plex doesn't render HTML in SRT.
-- **ASS drawing commands** (`m`, `l`, `b`, `s`, `c`, `p`) leak through ffmpeg as raw text. Must be stripped.
+- **ASS drawing commands** (`m`, `l`, `b`, `s`, `c`, `p`) leak through ffmpeg as raw text. Must be stripped. **Coordinates are floating-point** (e.g. `6.44`, `440.59`) — the sed regex must use `[0-9]+(\.[0-9]+)?` not just `[0-9]+` or all draw lines pass through unfiltered.
 - **ASS `\h` and `\N`/`\n`** become literal `\h` and `\n` in SRT output. Must be converted to spaces.
 - **PGS copies safely to MKV** on Samsung UHD (2017+). No extraction needed.
 - **VobSub/XSUB forces server transcode.** Always warn the user.
@@ -116,6 +116,15 @@ SRT naming: `MovieName.eng.srt`, `MovieName.jpn.srt`, `MovieName.eng.2.srt` etc.
 - **NVENC `-multipass 1` (qres) is the sweet spot.** 80-90% of `-multipass 2` (fullres) benefit at 10-20% speed cost. Fullres is 50% slower for 1-3% smaller files.
 - **NVENC lava-synth test sources don't work on all drivers.** Use `nvidia-smi` for GPU detection, not a synthetic ffmpeg test encode.
 - **RTX 4060 (Ada Lovelace) NVENC quality is excellent.** The old "NVENC makes files 15-30% larger" claim doesn't apply to Ada with multipass and AQ.
+
+### Current Machine Hardware
+- **GPU:** NVIDIA GeForce RTX 4060 (Ada Lovelace)
+- **Driver:** 595.71.05 | **CUDA:** 13.2 | **VRAM:** 8192 MiB
+- **Detection result:** Full NVENC path active — `-hwaccel cuda -hwaccel_output_format cuda` + `h264_nvenc`
+- **Verification commands:**
+  - `nvidia-smi` — GPU present and driver loaded
+  - `ffmpeg -encoders | grep h264_nvenc` — NVENC H.264 encoder available
+  - `ffmpeg -hwaccels | grep cuda` — CUDA hardware acceleration supported
 
 ### Bash
 - **`set -e pipefail` kills script on unguarded pipe failures.** Subtitle extraction `ffmpeg | sed > file` must be wrapped with `set +o pipefail` / `set -o pipefail`.
