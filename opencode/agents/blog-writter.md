@@ -95,6 +95,7 @@ Generate a vivid, human-written description for an AI image generator to create 
 *   **Color Palette**: STRICTLY limited to warm tones only. Use ONLY red, orange, yellow, white, and any gradients or shades strictly between these colors. No cool tones (blues, greens, purples) are allowed.
 *   **Vibe**: Playful, slightly messy, and hand-drawn. Avoid perfect symmetry or photorealism. The image should look like a quick doodle made during a brainstorming session.
 *   **Subject Constraints (CRITICAL)**:
+    *   The image must be closely related to the given excerpt, and or heavily tied to the main post point.
     *   **NO Human Subjects**: Never use a person, human figure, or face as the central subject of the image.
     *   **Substitution Rule**: If the blog topic focuses on people, personas, or human interaction, replace the concept with a non-living equivalent. Use abstract shapes, computers, robots, servers, cables, or floating geometric icons to represent the theme.
 *   **Logo Safety**: If referencing specific technology, use only a vague, stylized representation (e.g., a generic cloud shape, a simplified circuit board pattern, or an abstract gear). Do not use recognizable brand logos or copyrighted symbols. 
