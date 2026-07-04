@@ -1,0 +1,17 @@
+# Removes the native title bar and borders
+window-decoration = false
+
+# Specifically for Linux/GTK to disable the header bar
+gtk-titlebar = false
+
+# Value between 0.0 (fully transparent) and 1.0 (opaque)
+background-opacity = 0.88
+
+# font family
+font-family = "MesloLGL Nerd Font Mono"
+
+# Optional: adds blur to the transparent background
+# background-blur-radius = 20e
+
+# theme:
+theme = TokyoNight Storm
