@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # Set the IP address of your Windows VM
-VM_IP="xxx.xxx.xx.xxx" # Replace this with the actual IP address of your VM
+VM_IP="192.168.1.24" # Replace this with the actual IP address of your VM
 
 color="#cad3f5"
-bgcolor="#1e203080"
+bgcolor="#24273a"
+# bgcolor="#1e203080"
 vmStatus="<span>󰶐</span>"
 
 # Ping the VM to check if it's online (with a timeout)

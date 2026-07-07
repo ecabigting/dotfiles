@@ -19,9 +19,10 @@ workspace_layout default
 ##############################
 
 #border indicator on windows:
+# none | pixel 2
 default_border none
 
-hide_edge_borders smart
+hide_edge_borders none
 
 # Set inner/outer gaps
 gaps inner 6
@@ -31,7 +32,7 @@ gaps outer 3
 floating_modifier $mod
 
 # Disable focusing of windows or workspace on mouse hover
-focus_follows_mouse yes
+focus_follows_mouse no
 
 ######################################
 # keybindings for different actions: #
@@ -59,9 +60,12 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-# start a terminal
-# bindsym $mod+Return exec --no-startup-id xfce4-terminal -x tmux new -A -s callMeMartell
-bindsym $mod+Return exec --no-startup-id alacritty --title=" [ alacritty - tmux ] " -e tmux new -A -s callMeMartell 
+# start a alacritty terminal
+# bindsym $mod+Return exec --no-startup-id alacritty --title=" [ alacritty - tmux ] " -e tmux new -A -s callMeMartell 
+
+# start a ghostty terminal 
+bindsym $mod+Return exec --no-startup-id ghostty --title="[ 󱙝 ghostty ]" --command="tmux new -A -s callMeMartell"
+
 # kill focused window
 # bindsym $mod+q kill #default setting
 # custom script to escape some other type of window
@@ -147,22 +151,28 @@ bindsym XF86AudioMute exec --no-startup-id ~/.config/i3/scripts/volume_brightnes
 # mic mute toggle
 bindsym XF86AudioMicMute exec amixer sset Capture toggle
 # audio control
-bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause -p spotify_player
-bindsym XF86AudioNext exec --no-startup-id playerctl next -p spotify_player
-bindsym XF86AudioPrev exec --no-startup-id playerctl previous -p spotify_player
+# bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause -p spotify_player
+# bindsym XF86AudioNext exec --no-startup-id playerctl next -p spotify_player
+# bindsym XF86AudioPrev exec --no-startup-id playerctl previous -p spotify_player
 # Redirect sound to headphones
 # bindsym $mod+p exec --no-startup-id /usr/local/bin/switch-audio-port
 
 ## App shortcuts
 bindsym $mod+w exec --no-startup-id /usr/bin/zen-browser
 bindsym $mod+n exec --no-startup-id /usr/bin/thunar
-bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'gimp ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f'
+# bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'gimp ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f'
+
+bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'krita ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png'
 
 ## Take screenshot with `scrot` via mouse drag
 # saves the file first to `/tmp/screenshot.png`
 # moves the file to home folder with datetimestamp file name
 # open gimp that datetime filename
-bindsym --release $mod+Shift+s exec scrot /tmp/screenshot.png -s -f && mv /tmp/screenshot.png "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" && notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-snip.png" && gimp  -f "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" 
+# bindsym --release $mod+Shift+s exec scrot /tmp/screenshot.png -s -f && mv /tmp/screenshot.png "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" && notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-snip.png" && gimp  -f "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" 
+
+# open krita with the screen shot
+bindsym --release $mod+Shift+s exec scrot /tmp/screenshot.png -s -f && mv /tmp/screenshot.png "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" && notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-snip.png" && krita "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" 
+
 
 ## Take a Vidoo recording of a secion using
 # slop and then record with ffmpeg
@@ -186,12 +196,12 @@ set $ws1 "1:1"
 set $ws2 "2:2"
 set $ws3 "3:3"
 set $ws4 "4:4"
-set $ws5 "5: "
-set $ws6 "6: "
-set $ws7 "7: "
+set $ws5 "5:"
+set $ws6 "6:"
+set $ws7 "7:"
 set $ws8 "8:8"
-set $ws9 "9: "
-set $ws10 "10: "
+set $ws9 "9:"
+set $ws10 "10:"
 
 # switch to workspace
 bindcode $mod+10    workspace  $ws1
@@ -236,25 +246,22 @@ bindsym $mod+Ctrl+greater move workspace to output right
 bindsym $mod+Ctrl+less move workspace to output left
 
 # bind program to workspace and focus to them on startup:
-#assign [class="Xfce4-terminal"] $ws1
-#assign [class="(?i)firefox"] $ws2
-#assign [class="Thunar"] $ws3
-#assign [class="thunderbird"] $ws4
-#assign [class="TelegramDesktop"] $ws5
 assign [class="zen"] $ws1
-assign [class="Thorium-browser"] $ws2
-assign [class="Vivaldi-stable"] $ws3
-#assign [class="VSCodium"] $ws2
-#assign [class="Xfce4-terminal"] $ws3
+assign [class="librewolf"] $ws2
+assign [class="floorp"] $ws3
 assign [class="xfreerdp"] $ws5
+assign [class="Brave-browser"] $ws3
 assign [class="Virt-manager"] $ws5
 assign [class="teams-for-linux"] $ws6
 assign [class="firefox"] $ws6
 assign [class="Gimp"] $ws10
+assign [class="krita"] $ws10
 assign [class="^steam$"] $ws4
 assign [title="Battle.net"] $ws4
 assign [class="heroic"] $ws4
 assign [class="eu.betterbird.Betterbird"] $ws7
+assign [class="MongoDB Compass"] $ws8
+
 # automatic set focus new window if it opens on another workspace than the current:
 # for_window [class=Xfce4-terminal] focus
 # for_window [class=(?i)firefox] focus
@@ -314,23 +321,47 @@ exec_always --no-startup-id autotiling
 ## AUTO START APPS
 
 # Start gimp with my keyboard layout screenshot in the layout in ws10
-exec --no-startup-id sleep 1.2 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_Jupiter.png
+exec --no-startup-id sleep 1.1 && gimp -s /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_Jupiter.png
+# exec --no-startup-id sleep 1.0&& krita /mnt/FilesSSD/vmshare/stifmiester-lily58KeyMaps_Jupiter.png
 # Setup Workspace 9 with my custom layout
-exec --no-startup-id sleep 1.3 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/updatedWs9.json"
+exec --no-startup-id sleep 1.2 && i3-msg workspace $ws9 && i3-msg "append_layout ~/.config/i3/updatedWs9.json"
+
 # Start unimatrix in the terminal in the layout in ws9
+# alacritty
 exec --no-startup-id sleep 1.5 && alacritty --title="[ unimatrix ]" -e unimatrix -af -c=magenta -s=88
+# ghostty
+# exec --no-startup-id sleep 1.5 && ghostty --title="[ unimatrix ]" --command="unimatrix -af -c=cyan -s=88 "
+
 # Start spotify_player in the terminal in the in ws9
 # Need to use nm-online to check if network is online before actually opening spotify_player
+# alacritty
 exec --no-startup-id sleep 1.7 && alacritty --title="[ spotify_player ]" -e sh -c 'nm-online -t 20 && exec ~/.cargo/bin/spotify_player || echo "Network timeout. Press Enter to close."; read'
+# ghostty
+# exec --no-startup-id sleep 1.7 && ghostty --title="[ spotify_player ]" --command="/home/stifmiester/.cargo/bin/spotify_player"
+
 # Start cava in the terminal in the layout in ws9
+# alacritty
 exec --no-startup-id sleep 1.8 && alacritty --title="[ cava ]" -e cava
+# ghostty
+# exec --no-startup-id sleep 2 && ghostty --title="[ cava ]" --command=" cava "
+
 # Start btop  in the terminal in the layout in ws9
+# alacritty
 exec --no-startup-id sleep 2 && alacritty --title="[ btop ]" -e btop
+# ghostty
+# exec --no-startup-id sleep 2.1 && ghostty --title="[ btop ]" --command=" btop "
+
+# Pulse Mixer in the terminal in the layout in ws9
+# alacritty
+exec --no-startup-id sleep 2.2 && alacritty --title="[ pulsemixer ]" -e pulsemixer
+# ghostty
+# exec --no-startup-id sleep 2.2 && ghostty --title="[ pulsemixer ]" --command=" pulsemixer "
+
 # Start Teams and Firefox on if its A weekday and office hours
 # exec --no-startup-id sh -c '( sleep 2.5 && if [ $(date +%u) -lt 6 ] && [ $(date +%H) -gt 5 ] && [ $(date +%H) -lt 19 ]; then i3-msg "workspace $ws6"; firefox & sleep 4 && teams-for-linux & fi ) &'
-exec --no-startup-id sh -c '( sleep 2.5 && if [ $(date +%u) -lt 6 ] && [ $(date +%H) -gt 5 ] && [ $(date +%H) -lt 19 ]; then firefox & virsh --connect qemu:///system start win11-base & fi ) &'
+# exec --no-startup-id sh -c '( sleep 2.8 && if [ $(date +%u) -lt 6 ] && [ $(date +%H) -gt 5 ] && [ $(date +%H) -lt 19 ]; then firefox & virsh --connect qemu:///system start win11-base & fi ) &'
 # Start betterbird mail client
-exec --no-startup-id sh -c '( sleep 3 && betterbird & ) &'
+exec --no-startup-id sh -c '( sleep 3.1 && betterbird & ) &'
 
 ###############
 # system tray #
@@ -360,6 +391,7 @@ for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
 for_window [class="Variety" instance="Variety"] floating enable
 for_window [class="vlc" instance="vlc"] floating enable
 for_window [class="Viewnior" instance="viewnior"] floating enable
+for_window [class="Rustdesk" instance="rustdesk"] floating enable
 for_window [class="feh"] floating enable, move position 2000 px 100 px
 
 # set floating (nontiling) for special apps
@@ -370,7 +402,7 @@ for_window [class="Bluetooth-sendto" instance="bluetooth-sendto"] floating enabl
 for_window [class="Xfce4-clipman-history"] floating enable
 for_window [class="Pamac-manager"] floating enable
 for_window [title="Arcadia Launcher"] floating enable
-for_window [title="Arcadia Client"] floating enable, move position 774 px 8 px
+for_window [title="Arcadia Client"] floating enable, move position 774 px 40 px
 for_window [title="Battle.net"] floating enable
 for_window [window_role="About"] floating enable
 
@@ -394,11 +426,11 @@ for_window [title="Friends List"] floating enable
 # for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws5
 
 # Shield Boom party
-for_window [title=".*KingRickySan.*"] move to workspace $ws1
-for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
-for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
-for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws4
-for_window [title=".*BolterVee.*"] move to workspace $ws5
+# for_window [title=".*KingRickySan.*"] move to workspace $ws1
+# for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
+# for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
+# for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws4
+# for_window [title=".*BolterVee.*"] move to workspace $ws5
 
 # WS HO Party
 # for_window [title=".*DoctoraRickaSanchez.*"] move to workspace $ws1
@@ -412,6 +444,14 @@ for_window [title=".*BolterVee.*"] move to workspace $ws5
 # for_window [title=".*MistressSwanchez.*"] move to workspace $ws2
 # for_window [title=".*PrincessMykkah.*"] move to workspace $ws3
 # for_window [title=".*BolterVee.*"] move to workspace $ws4
+
+# Ricky the Bowling Basher
+for_window [title=".*PrinceRicky.*"] move to workspace $ws1
+for_window [title=".*ChemicalVee.*"] move to workspace $ws2
+for_window [title=".*MistressSwanchez.*"] move to workspace $ws3
+for_window [title=".*PrincessMykkah.*"] move to workspace $ws4
+for_window [title=".*BolterVee.*"] move to workspace $ws5
+
 
 # set size of floating window
 for_window [window_role="(?i)GtkFileChooserDialog"] resize set 640 480 #to set size of file choose dialog
@@ -479,15 +519,17 @@ client.background        $base
 # Start i3bar to display a workspace bar
 # (plus the system information i3status finds out, if available)
 bar {
+    id bar-1
     font pango: MesloLGL Nerd Font Regular 15
     status_command i3blocks -c ~/.config/i3/i3blocks.conf
     position top
-    i3bar_command i3bar --transparency
-    # i3bar_command i3bar
+    # i3bar_command i3bar --transparency
+    i3bar_command i3bar
     # # it could be that you have no primary display set: set one (xrandr --output <output> --primary)
     # # reference: https://i3wm.org/docs/userguide.html#_tray_output
-    tray_output primary
-    tray_padding 7
+    tray_output DP-2
+    output DP-2
+    tray_padding 8
     # When strip_workspace_numbers is set to yes,
     # any workspace that has a name of the form
     # “[n][:][NAME]” will display only the name.
@@ -495,14 +537,47 @@ bar {
     workspace_min_width 30
     ### Catppuccin Colors for i3bar
     colors {
-            separator          $transparentbase
-            background         $transparentbase
+            separator          $base
+            background         $base
             statusline         $text
             focused_statusline $text
-            focused_separator  $transparentbase
-            focused_workspace  $transparentbase $transparentbase  $green  $red
-            active_workspace   $transparentbase $transparentbase $blue	$red
-            inactive_workspace $transparentbase $transparentbase $surface1	$red
+            focused_separator  $base
+            focused_workspace  $base $base  $green  $red
+            active_workspace   $base $base $blue	$red
+            inactive_workspace $base $base $surface1	$red
+            urgent_workspace   $red	$red $base	$lavender
+            binding_mode       $red	$red $base	$lavender
+    }
+}
+
+bar {
+    id bar-2
+    font pango: MesloLGL Nerd Font Regular 15
+    # status_command i3blocks -c ~/.config/i3/i3blocks.conf
+    position top
+    tray_output none
+    workspace_buttons yes
+    # i3bar_command i3bar --transparency
+    i3bar_command i3bar
+    # # it could be that you have no primary display set: set one (xrandr --output <output> --primary)
+    # # reference: https://i3wm.org/docs/userguide.html#_tray_output
+    output HDMI-1
+    tray_padding 8
+    # When strip_workspace_numbers is set to yes,
+    # any workspace that has a name of the form
+    # “[n][:][NAME]” will display only the name.
+    strip_workspace_numbers yes
+    workspace_min_width 30
+    ### Catppuccin Colors for i3bar
+    colors {
+            separator          $base
+            background         $base
+            statusline         $text
+            focused_statusline $text
+            focused_separator  $base
+            focused_workspace  $base $base  $green  $red
+            active_workspace   $base $base $blue	$red
+            inactive_workspace $base $base $surface1	$red
             urgent_workspace   $red	$red $base	$lavender
             binding_mode       $red	$red $base	$lavender
     }
@@ -545,3 +620,8 @@ bindsym --release Num_Lock exec pkill -SIGRTMIN+10 i3blocks
 # bind mouse button 9 to space key
 exec --no-startup-id sh -c "sleep 1 && xbindkeys -f ~/.config/.xbindkeysrc"
 
+# Start the GNOME Keyring Daemon for credential storage (like for Compass)
+# exec --no-startup-id /usr/bin/gnome-keyring-daemon --start --components=secrets
+
+# Use a shell script to start the Keyring and set environment variables
+# exec --no-startup-id gnome-keyring-daemon -r -d

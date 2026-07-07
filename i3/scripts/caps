@@ -2,7 +2,8 @@
 
 status="$(xset -q | grep Caps | awk '{ print $4 }')"
 lockstatus="󰬈"
-bgcolor="#1e203080"
+# bgcolor="#1e203080"
+bgcolor="#24273a"
 color="#a6da95"
 if [ "$status" == "off" ]; then
   color="#cad3f5"
