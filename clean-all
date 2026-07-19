@@ -33,6 +33,8 @@ echo "==================================================="
 npm cache clear --force
 echo "Cleaning _npx/ folder"
 rm -rf ~/.npm/_npx/*
+echo "Cleaning _cacache/ folder"
+rm -rf ~/.npm/_cacache
 
 ## clear coredumps
 echo "==================================================="
