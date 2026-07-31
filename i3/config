@@ -250,6 +250,7 @@ assign [class="zen"] $ws1
 assign [class="librewolf"] $ws2
 assign [class="floorp"] $ws3
 assign [class="xfreerdp"] $ws5
+assign [title="StarCraft II"] $ws5
 assign [class="Brave-browser"] $ws3
 assign [class="Virt-manager"] $ws5
 assign [class="teams-for-linux"] $ws6
