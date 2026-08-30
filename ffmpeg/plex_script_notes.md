@@ -129,6 +129,7 @@ Burn path: largest English image sub (by byte/duration rank) → `subtitles='<fi
 - **Fixed:** encoder detection was silently BROKEN — `ffmpeg | grep -q hevc_nvenc` under `set -o pipefail` always failed (grep exits on first match → SIGPIPE → exit 141) → NVENC/libx265 always "absent" → every re-encode fell back to libx264. Detection now captures lists once and string-matches.
 - **Fixed:** loop-guard `ffprobe | grep -q` had the same SIGPIPE race → same capture+string-match fix.
 - **Fixed:** burn `subtitles=:si=` used the global stream index; now uses 0-based subtitle rank (real bug from v2 — would have killed any burn of a multi-track PGS file).
+- **Fixed:** real-run crash on AV1/HEVC 10-bit — `-hwaccel_output_format cuda` + forced `-pix_fmt yuv420p10le` produced "Impossible to convert" (`auto_scale` can't take `cuda` frames). The pure-GPU no-filter path now feeds NVENC native CUDA frames (no `-pix_fmt`; bit depth follows source). Verified across av1 8/10-bit, h264 8/10-bit (Hi10P falls back to SW decode), hevc 8/10-bit, interlace → filter chain, and ASS two-pass sub. Filter-chain path keeps forced 10-bit (decodes to system memory).
 - **Changed:** re-encodes now prefer `hevc_nvenc` (HEVC, not H.264) so burned/copy-incompatible tracks stay GPU. Software x265/x264 only as failsafes.
 - **Added:** auto-deinterlace (interlaced → yadif prepended, never copy-eligible).
 - **Added:** `--dry-run` mode + post-encode ffprobe HEVC verification (delete + fail-count on mismatch).
@@ -147,6 +148,7 @@ Burn path: largest English image sub (by byte/duration rank) → `subtitles='<fi
 - **ISO 639-2 (`eng`/`jpn`/`kor`) is standard in ffprobe.** ISO 639-1 (`en`/`ja`/`ko`) is extremely rare but harmless to also match.
 
 ### ffprobe / ffmpeg
+- **NEVER force `-pix_fmt` when decoding to CUDA frames.** `-hwaccel cuda -hwaccel_output_format cuda` + `-pix_fmt yuv420p10le` makes ffmpeg insert `auto_scale`, which cannot accept the `cuda` pixel format → `Impossible to convert between the formats supported by the filter 'Parsed_null_0' and the filter 'auto_scale_0'` on any GPU-decoded 10-bit source (AV1/HEVC). NVENC must be fed the decoder's native CUDA frames (no `-pix_fmt`; output depth follows source). Filter-chain paths decode to system memory, so they CAN keep `-pix_fmt`.
 - **`pix_fmt` is more reliable than `bits_per_raw_sample` for bit depth.** `bits_per_raw_sample` is often absent. Parse bit depth from `pix_fmt` (e.g., `yuv420p10le` → 10).
 - **ffprobe subtitle codec names are not what you expect.** SRT = `subrip` (not `srt`), VobSub = `dvd_subtitle`, PGS = `hdmv_pgs_subtitle`.
 - **`-hwaccel cuda` + `-hwaccel_output_format cuda` keeps pipeline entirely on GPU for NVENC.** Must omit `-hwaccel_output_format cuda` when using libx264 (CPU encoder can't access GPU memory).

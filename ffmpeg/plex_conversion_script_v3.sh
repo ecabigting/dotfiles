@@ -218,7 +218,15 @@ while IFS= read -r SOURCE_FILE; do
   VIDEO_FILTERS=""
   VIDEO_OPTS=()
   HWACCEL=""
-  NVENC_OPTS=(-c:v hevc_nvenc -preset p7 -tune hq -cq 27 -rc vbr -multipass 1 -b_ref_mode middle -bf 4 -spatial-aq 1 -temporal-aq 1 -rc-lookahead 32 -pix_fmt yuv420p10le)
+  # 2026-08-30 fix: NVENC_OPTS no longer forces -pix_fmt. When frames are
+  # delivered as CUDA hw frames (via -hwaccel_output_format cuda) a forced
+  # -pix_fmt yuv420p10le inserts auto_scale, which cannot accept the `cuda`
+  # pix fmt -> "Impossible to convert between the formats supported by the
+  # filter 'Parsed_null_0' and the filter 'auto_scale_0'" on any GPU-decoded
+  # 10-bit source (AV1/HEVC). The pure-GPU path now feeds NVENC the decoder's
+  # native frames (output bit depth follows the source). The filter-chain path
+  # re-adds -pix_fmt because it decodes to system memory (see below).
+  NVENC_OPTS=(-c:v hevc_nvenc -preset p7 -tune hq -cq 27 -rc vbr -multipass 1 -b_ref_mode middle -bf 4 -spatial-aq 1 -temporal-aq 1 -rc-lookahead 32)
   SAFE_VIDEO=0
   case "$CODEC" in
     h264)
@@ -266,7 +274,7 @@ while IFS= read -r SOURCE_FILE; do
     if (( NVENC_HEVC )); then
       if [ -n "$VIDEO_FILTERS" ]; then
         echo "   [VIDEO]: Re-encoding via NVENC HEVC (filter chain: $VIDEO_FILTERS)."
-        VIDEO_OPTS=("${NVENC_OPTS[@]}" -vf "$VIDEO_FILTERS")
+        VIDEO_OPTS=("${NVENC_OPTS[@]}" -pix_fmt yuv420p10le -vf "$VIDEO_FILTERS")
       else
         echo "   [VIDEO]: Re-encoding via NVENC HEVC (GPU decode+encode, no filter chain)."
         HWACCEL="-hwaccel cuda -hwaccel_output_format cuda"
