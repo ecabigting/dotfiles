@@ -1009,7 +1009,7 @@ Re-read Step 3's output and confirm each Global Constraint (#1–#11) holds on b
 - Modify: `ffmpeg/plex_conversion_script_v3.sh:11-22` (detection), and the loop guard at `:45`
 - Test: `bash -n`; a standalone replica of the new detection block printed under `bash -c` must report `NVENC_HEVC=1 HAS_LIBX265=1 HAS_CUDA_HWACCEL=1` on this machine
 
-- [ ] **Step 1: Write the failing check (replica of the OLD detection)**
+- [x] **Step 1: Write the failing check (replica of the OLD detection)**
 
 Run:
 ```bash
@@ -1021,7 +1021,7 @@ echo "OLD: NVENC_HEVC=$NVENC_HEVC HAS_LIBX265=$HAS_LIBX265"'
 ```
 Expected: `NVENC_HEVC=0 HAS_LIBX265=0` (the bug, reproduced).
 
-- [ ] **Step 2: Write the passing check (the NEW detection)**
+- [x] **Step 2: Write the passing check (the NEW detection)**
 
 Run:
 ```bash
@@ -1037,7 +1037,7 @@ echo "NEW: NVENC_HEVC=$NVENC_HEVC HAS_LIBX265=$HAS_LIBX265 HAS_CUDA_HWACCEL=$HAS
 ```
 Expected: `NVENC_HEVC=1 HAS_LIBX265=1 HAS_CUDA_HWACCEL=1` (proves the string-match is immune to the SIGPIPE race).
 
-- [ ] **Step 3: Implement in v3**
+- [x] **Step 3: Implement in v3**
 
 Replace `ffmpeg/plex_conversion_script_v3.sh:11-22` with:
 
@@ -1070,7 +1070,7 @@ else
 fi
 ```
 
-- [ ] **Step 4: Fix the loop guard (`:45`)**
+- [x] **Step 4: Fix the loop guard (`:45`)**
 
 Replace the guard with:
 
@@ -1081,13 +1081,13 @@ Replace the guard with:
   fi
 ```
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run: `bash -n ffmpeg/plex_conversion_script_v3.sh`
 Run: `command -v shellcheck >/dev/null && shellcheck -S warning ffmpeg/plex_conversion_script_v3.sh || echo "shellcheck not installed"`
 Expected: clean syntax; shellcheck (if present) reports nothing the step must fix.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add ffmpeg/plex_conversion_script_v3.sh
@@ -1101,7 +1101,7 @@ git commit -m "update"
 **Files:**
 - Modify: `ffmpeg/plex_conversion_script_v3.sh` (arg parsing before the usage check; assembly; execute block)
 
-- [ ] **Step 1: Add `--dry-run` arg parsing**
+- [x] **Step 1: Add `--dry-run` arg parsing**
 
 Insert after the detection block (before the `if [ "$#" -ne 1 ]` usage check):
 
@@ -1113,7 +1113,7 @@ if [ "${1:-}" == "--dry-run" ]; then
 fi
 ```
 
-- [ ] **Step 2: Guard the `converted/` mkdir (dry-run must not write)**
+- [x] **Step 2: Guard the `converted/` mkdir (dry-run must not write)**
 
 Change `mkdir -p "$OUTPUT_DIR"` to:
 
@@ -1123,7 +1123,7 @@ Change `mkdir -p "$OUTPUT_DIR"` to:
   fi
 ```
 
-- [ ] **Step 3: Split execute vs dry-run + add verify**
+- [x] **Step 3: Split execute vs dry-run + add verify**
 
 Inside the loop body (rename `# ---- 5. Assemble and execute ----` to `# ---- 5. Assemble, execute & verify ----`), replace the execute block with:
 
@@ -1159,7 +1159,7 @@ Inside the loop body (rename `# ---- 5. Assemble and execute ----` to `# ---- 5.
   fi
 ```
 
-- [ ] **Step 4: Initialize per-loop variables**
+- [x] **Step 4: Initialize per-loop variables**
 
 At the top of the loop body (after `start_time_human=...`), add:
 
@@ -1169,7 +1169,7 @@ At the top of the loop body (after `start_time_human=...`), add:
   TMP_SRT_FILE=""
 ```
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run: `bash -n ffmpeg/plex_conversion_script_v3.sh`
 Expected: clean. (Full dry-run behavior is asserted in Task 11.)
@@ -1181,7 +1181,7 @@ Expected: clean. (Full dry-run behavior is asserted in Task 11.)
 **Files:**
 - Modify: `ffmpeg/plex_conversion_script_v3.sh` (video-decision block `:139-195`)
 
-- [ ] **Step 1: Add interlace detection + NVENC / deinterlace logic**
+- [x] **Step 1: Add interlace detection + NVENC / deinterlace logic**
 
 Replace the video-decision block (`# ---- 3. Video decision ----` … the closing `fi` before `# ---- 4. Audio decision ----`) with:
 
@@ -1267,7 +1267,7 @@ Replace the video-decision block (`# ---- 3. Video decision ----` … the closin
   fi
 ```
 
-- [ ] **Step 2: Verify option combos actually encode (direct ffmpeg smoke tests, NOT the script)**
+- [x] **Step 2: Verify option combos actually encode (direct ffmpeg smoke tests, NOT the script)**
 
 ```bash
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
@@ -1286,7 +1286,7 @@ timeout 60 ffmpeg -v error -y -f lavfi -i "testsrc2=size=640x360:rate=24" -t 1 \
 ```
 Expected: A and B exit 0 with no error output (real burn validity is covered by Task 10's fixture; C is a soft probe).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add ffmpeg/plex_conversion_script_v3.sh
@@ -1302,7 +1302,7 @@ git commit -m "update"
 
 **Design:** `-c:s subrip` inline leaks ASS styling into the embedded track (v2 lesson; ffmpeg emits `<font size="40">`, `{\an8}`, literal `\h`, and draw coordinates as raw text). Instead: pass 1 extracts the text sub with the v2 cleanup sed (extended with a mid-line draw rule) to a temp SRT; pass 2 remuxes it via `-i <tmp.srt> -map 1:0 -c:s subrip`. Temp SRT is removed on success AND failure; on extraction failure the subs are dropped (video still proceeds). Native `subrip` keeps `-c:s copy`.
 
-- [ ] **Step 1: Implement the branch**
+- [x] **Step 1: Implement the branch**
 
 Replace the `*)` branch (lines `108-115`) with:
 
@@ -1348,7 +1348,7 @@ Replace the `*)` branch (lines `108-115`) with:
         ;;
 ```
 
-- [ ] **Step 2: Wire the second input into assembly**
+- [x] **Step 2: Wire the second input into assembly**
 
 Change the command build to:
 
@@ -1365,7 +1365,7 @@ Change the command build to:
   COMMAND+=(-map_chapters 0 -map_metadata 0 -y "$OUTPUT_FILE_MKV")
 ```
 
-- [ ] **Step 3: Validate the sed + remux combo (direct ffmpeg, NOT the script)**
+- [x] **Step 3: Validate the sed + remux combo (direct ffmpeg, NOT the script)**
 
 ```bash
 W=$(mktemp -d)
@@ -1389,7 +1389,7 @@ rm -rf "$W"
 ```
 Expected: the printed stream is exactly `x  val` then `store this line` — the draw-command line deleted and the mid-line `{\an8}`/`<font ...>`/`\h` stripped.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add ffmpeg/plex_conversion_script_v3.sh
@@ -1405,7 +1405,7 @@ git commit -m "update"
 - Modify: `ffmpeg/plex_script_notes.md`
 - Test: run the harness over real library files (never executing conversions — `--dry-run` only) plus `bash -n` + `shellcheck`
 
-- [ ] **Step 1: Write the harness**
+- [x] **Step 1: Write the harness**
 
 Create `ffmpeg/tests/simulate_gpu.sh`:
 
@@ -1471,7 +1471,7 @@ if [ "$FAILS" -gt 0 ]; then echo "RTL: $FAILS failure(s)" >&2; exit 1; fi
 echo "RTL: all GPU checks passed."
 ```
 
-- [ ] **Step 2: Run it against the real library**
+- [x] **Step 2: Run it against the real library**
 
 ```bash
 bash ffmpeg/tests/simulate_gpu.sh \
@@ -1479,7 +1479,7 @@ bash ffmpeg/tests/simulate_gpu.sh \
 ```
 Expected: `ok:` lines for every assert; `RTL: all GPU checks passed.`; re-encode decisions all `Re-encoding via NVENC HEVC`. Run at least 3 draws (change the rooths to the JJK S01 / S03 BD folders too) to exercise BDRip AVC + HEVC + AV1 inputs.
 
-- [ ] **Step 3: Full static checks**
+- [x] **Step 3: Full static checks**
 
 ```bash
 bash -n ffmpeg/plex_conversion_script_v3.sh
@@ -1487,7 +1487,7 @@ command -v shellcheck >/dev/null && shellcheck -S warning ffmpeg/plex_conversion
 ```
 Expected: clean.
 
-- [ ] **Step 4: Update `plex_script_notes.md`**
+- [x] **Step 4: Update `plex_script_notes.md`**
 
 Remove the stale "grep encoders with `ffmpeg -hide_banner -encoders`" note (superseded by the string-match rule). Add to the Key Learnings section:
 
@@ -1514,7 +1514,7 @@ Remove the stale "grep encoders with `ffmpeg -hide_banner -encoders`" note (supe
   sample real files and assert the GPU is selected.
 ```
 
-- [ ] **Step 5: Final verify + commit**
+- [x] **Step 5: Final verify + commit**
 
 ```bash
 git add ffmpeg/plex_conversion_script_v3.sh ffmpeg/tests/simulate_gpu.sh ffmpeg/plex_script_notes.md
