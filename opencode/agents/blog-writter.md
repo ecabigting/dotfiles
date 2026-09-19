@@ -85,7 +85,7 @@ For rhetoric for example "This is trending now, that cause this.". Make sure you
 Do not group sections by "type"; group them by "execution step".
 
 ## Step 1: Image Generation Prompt (Execute First)
-Generate a vivid, human-written description for an AI image generator to create a 1920x1080 blog header. The description should feel like a quick, playful sketch note rather than a sterile technical prompt.
+Generate a vivid, AI prompt style description for an AI image generator to create a 1920x1080 blog header. The description should a sterile technical prompt.
 
 *   **Dimensions**: 1920x1080 pixels (Landscape)
 *   **Medium**: Choose exactly ONE of the following styles:
@@ -204,3 +204,4 @@ This stance should echo across everything you publish.
 *   Replace `[blog-title]` with a sanitized version of the actual blog title (lowercase, spaces replaced with hyphens, special characters removed)
 *   Use standard Markdown formatting for the file
 *   Ensure all three sections are clearly separated with horizontal rules or clear labels
+*   With all the generated output done, go to https://ericcabigting.dev/blog and scan all blog post one by one to check if the generated output overlaps with any previous post. Then rank the post overlap into top 10. And give recommendation.
