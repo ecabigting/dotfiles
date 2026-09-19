@@ -22,11 +22,23 @@ Convert any video file for **guaranteed direct play** on Samsung (2018+, Tizen) 
 ```
 h264 + yuv420p ≤1920x1088 ≤30fps     → COPY
 HEVC + yuv420p/yuv420p10le same      → COPY
+HDR (color_transfer smpte2084/arib-std-b67) → NEVER copy → RE-ENCODE w/ HDR→SDR tonemap
 Interlaced (field_order tt/bb/tb/bt) → NEVER copy → re-encode (prepends yadif)
-Everything else (Hi10P, AV1, VP9, 12-bit HEVC, burn, etc.) → RE-ENCODE to HEVC
+Everything else (Hi10P, AV1, VP9, 12-bit HEVC, etc.) → RE-ENCODE to HEVC
 ```
 
-Interlaced → never copy-eligible. Re-encode path uses NVENC `hevc_nvenc` whenever available. No filter chain → `-hwaccel cuda -hwaccel_output_format cuda` (GPU decode+encode). With a filter chain (yadif / scale / fps / subtitle burn) → NVENC WITHOUT hwaccel (filters run on CPU frames, encode still on GPU). libx265 / libx264 are failsafes with loud stderr warnings.
+Interlaced → never copy-eligible. HDR → never copy-eligible (even ≤1080p: an entry-level Samsung panel plays HDR too dark; the script bakes in SDR BT.709 so no tone-metadata survives). Re-encode path uses NVENC `hevc_nvenc` whenever available. No filter chain → `-hwaccel cuda -hwaccel_output_format cuda` (GPU decode+encode). With a filter chain (yadif / scale / fps / HDR tonemap) → NVENC WITHOUT hwaccel (filters run on CPU frames, encode still on GPU). libx265 / libx264 are failsafes with loud stderr warnings.
+
+### HDR → SDR tonemap chain (separate filter path)
+
+HDR (PQ/smpte2084 or HLG/arib-std-b67) forces a re-encode through the filter chain. The tonemap core is appended after any yadif/scale/fps:
+```
+zscale=t=linear:npl=100,format=gbrpf32le,tonemap=hable:desat=0,zscale=primaries=bt709:transfer=bt709,format=yuv420p10le
+```
+- Requisite filters in the ffmpeg build: `zscale` (libzimg) + `tonemap`. Checked once at pre-flight; if a file is HDR and they're absent → hard `[SANITY-FAIL]` skip (never silently produce the dark HDR pass-through).
+- Output is tagged SDR BT.709 explicitly (`-colorspace bt709 -color_trc bt709 -color_primaries bt709 -color_range tv`) at `yuv420p10le`. Plex then shows no HDR badge and the TV's HDR mode never triggers.
+- `npl=100` = 1000-nit mastering assumption (standard-good default). `desat=0` keeps color in near-white highlights.
+- These re-encodes SW-decode 4K HDR on CPU (filter chain disables GPU decode) — slow but correct; only HDR files pay this cost.
 
 ### 4. Audio Decision
 
@@ -42,15 +54,15 @@ Collects ALL JPN/ENG/KOR audio tracks in priority order (KOR → JPN → ENG). F
 ### 5. Subtitle Decision
 
 ```
-PGS / DVB / VobSub / XSUB (image)    → BURNED into video (GPU filter-chain re-encode)
+PGS / DVB / VobSub / XSUB (image)    → MUXED as soft track (NOT burned; libass cannot render image subs)
 ASS / SRT / SubRip (text, non-subrip) → TWO-PASS: extract→clean to temp SRT, remux as subrip
 subrip (text, already SRT)            → COPY embedded
-No English sub                        → dropped (no burn, no track)
+No English sub                        → dropped (no track)
 ```
 
-Two-pass text extraction (`ffmpeg | sed`, wrapped in `set +o pipefail`): extract stream to `-f srt`, strip ASS `{\...}` override blocks and HTML tags, replace `\h` / `\N` / `\n` with spaces, delete ASS drawing command lines. Temp SRT + err file are removed on success AND failure; extraction failure drops subtitles and continues (video unaffected). The clean SRT is remuxed as subrip via a second input: `-i <temp.srt> -map 1:0 -c:s subrip`.
+Image subs (PGS/DVD/DVB/XSUB) are **muxed as a soft track** (`-map 0:<idx> -c:s copy`), never burned. The old burn path used the libass `subtitles` filter, which **cannot render image subtitles** — "Only text based subtitles are currently supported" at filter-graph init → the whole re-encode died. If the TV/Plex can't render PGS, Plex burns it server-side during playback instead.
 
-Burn path: largest English image sub (by byte/duration rank) → `subtitles='<file>':si=<rank>` via libass. **`si` is the 0-based RANK among subtitle streams, NOT the global stream index** (a PGS at global index 5 with many tracks otherwise fails with "Unable to locate subtitle stream").
+Two-pass text extraction (`ffmpeg | sed`, wrapped in `set +o pipefail`): extract stream to `-f srt`, strip ASS `{\...}` override blocks and HTML tags, replace `\h` / `\N` / `\n` with spaces, delete ASS drawing command lines. Temp SRT + err file are removed on success AND failure; extraction failure drops subtitles and continues (video unaffected). The clean SRT is remuxed as subrip via a second input: `-i <temp.srt> -map 1:0 -c:s subrip`.
 
 ### 6. MKV Assembly
 - Copies video (`-c:v copy`) or re-encodes
@@ -96,6 +108,8 @@ Burn path: largest English image sub (by byte/duration rank) → `subtitles='<fi
 - **HEVC Main 10 direct-plays on Samsung 2018+.** The original assumption that "Samsung doesn't support HEVC" was wrong. Re-encoding HEVC→h264 was a waste of GPU time and caused quality loss.
 - **h264 10-bit (Hi10P) is dead on TVs.** No Samsung or LG model supports it. Must re-encode.
 - **Resolution gates are unnecessary.** Samsung/LG play any resolution h264/HEVC up to their max (4K/8K). The old 720p/1080p/4K thresholds were redundant.
+- **Entry-level Samsung panels show HDR too dark.** HDR10/PQ sources (even ones the TV technically direct-plays) look near-black in VLC and on low-nit panels. The fix is baking SDR BT.709 into the file, not adjusting TV color-tone settings at each watch. Detect HDR from `.color_transfer` (`smpte2084`=HDR10, `arib-std-b67`=HLG); `.color_primaries` (bt2020) and pix_bit_depth 10 are corroborating but not sufficient alone.
+- **HDR → SDR needs `zscale` (libzimg) + `tonemap` filters.** The proven chain: `zscale=t=linear:npl=100,format=gbrpf32le,tonemap=hable:desat=0,zscale=primaries=bt709:transfer=bt709,format=yuv420p10le`. `t=linear` converts PQ/HLG to linear light, `tonemap` compresses with the hable curve, `zscale=primaries=bt709:transfer=bt709` re-tags non-HDR gamut/transfer, explicit `format=` sets the encoder pixel format. Without these filters the script refuses the file rather than emit dark HDR.
 
 ### Audio
 - **AC3/E-AC3 passthrough is safe.** Both Samsung and LG hardware-decode it natively. Re-encoding AC3→AAC is unnecessary quality loss.
@@ -107,8 +121,7 @@ Burn path: largest English image sub (by byte/duration rank) → `subtitles='<fi
 - **ffmpeg's ASS→SRT conversion injects HTML tags** (`<b>`, `<i>`, `<font ...>`) from ASS styling. These must be stripped — Samsung Plex doesn't render HTML in SRT.
 - **ASS drawing commands** (`m`, `l`, `b`, `s`, `c`, `p`) leak through ffmpeg as raw text. Must be stripped. **Coordinates are floating-point** (e.g. `6.44`, `440.59`) — the sed regex must use `[0-9]+(\.[0-9]+)?` not just `[0-9]+` or all draw lines pass through unfiltered.
 - **ASS `\h` and `\N`/`\n`** become literal `\h` and `\n` in SRT output. Must be converted to spaces.
-- **PGS/dvd/dvb/xsub now BURN in** via the libass `subtitles` filter (GPU chain). `si` must be the 0-based subtitle rank, not the global stream index.
-- **VobSub/XSUB no longer warn-and-copy** — they burn in like PGS (Plex always transcodes image subs otherwise).
+- **Image subs (PGS/DVD/DVB/XSUB) CANNOT be burned in.** libass (the `subtitles` filter) only renders text subs — a PGS burn dies at graph init with "Only text based subtitles are currently supported". The 2026-08-30 `si`-rank fix was correct but moot: image subs are now **muxed as soft tracks** and Plex burns them server-side at playback if needed. Samsung Tizen 3.0+ (2017+) direct-plays PGS anyway (see matrix below).
 - **Subtitle language tags in source files can be wrong.** Trusting `.tags.language` blindly gets you German text labeled as English. The script can't detect this — it's a source file issue.
 
 ### NVENC
@@ -128,13 +141,14 @@ Burn path: largest English image sub (by byte/duration rank) → `subtitles='<fi
 ### 2026-08-30 Changelog (v3 NVENC hardening)
 - **Fixed:** encoder detection was silently BROKEN — `ffmpeg | grep -q hevc_nvenc` under `set -o pipefail` always failed (grep exits on first match → SIGPIPE → exit 141) → NVENC/libx265 always "absent" → every re-encode fell back to libx264. Detection now captures lists once and string-matches.
 - **Fixed:** loop-guard `ffprobe | grep -q` had the same SIGPIPE race → same capture+string-match fix.
-- **Fixed:** burn `subtitles=:si=` used the global stream index; now uses 0-based subtitle rank (real bug from v2 — would have killed any burn of a multi-track PGS file).
 - **Fixed:** real-run crash on AV1/HEVC 10-bit — `-hwaccel_output_format cuda` + forced `-pix_fmt yuv420p10le` produced "Impossible to convert" (`auto_scale` can't take `cuda` frames). The pure-GPU no-filter path now feeds NVENC native CUDA frames (no `-pix_fmt`; bit depth follows source). Verified across av1 8/10-bit, h264 8/10-bit (Hi10P falls back to SW decode), hevc 8/10-bit, interlace → filter chain, and ASS two-pass sub. Filter-chain path keeps forced 10-bit (decodes to system memory).
 - **Changed:** re-encodes now prefer `hevc_nvenc` (HEVC, not H.264) so burned/copy-incompatible tracks stay GPU. Software x265/x264 only as failsafes.
+- **Changed:** image subs (PGS/DVD/DVB/XSUB) are now **muxed as soft tracks**, never burned. The old libass burn path could NOT render image subs — a PGS burn died at graph init ("Only text based subtitles are currently supported"). Plex handles image subs server-side at playback if the TV doesn't direct-play them (Samsung Tizen 3.0+ direct-plays PGS).
+- **Added:** HDR → SDR path. HDR (`.color_transfer` = `smpte2084`/`arib-std-b67`) is never copy-eligible; such files re-encode through the tonemap filter chain (`zscale=t=linear:npl=100,format=gbrpf32le,tonemap=hable:desat=0,zscale=primaries=bt709:transfer=bt709,format=yuv420p10le`) into SDR BT.709-tagged HEVC (`-colorspace bt709 -color_trc bt709 -color_primaries bt709 -color_range tv`). Output depth stays 10-bit (banding fend-off; TV proven to play yuv420p10le). Pre-flight fails hard if `zscale`/`tonemap` are missing in the build when an HDR file is encountered (never emit dark HDR pass-through). Applies to the two 4K HDR10 Thunderbolt films (Bandit Flower / December Sky), the only HDR titles in the UC Gundam library.
 - **Added:** auto-deinterlace (interlaced → yadif prepended, never copy-eligible).
 - **Added:** `--dry-run` mode + post-encode ffprobe HEVC verification (delete + fail-count on mismatch).
 - **Added:** two-pass subtitle cleanup reinstated (extract ASS→clean→remux as subrip via second input; temp cleaned on success/failure).
-- **Verified:** FFmpeg smoke tests (NVENC 10-bit, yadif+scale+fps filter chain, subtitle burn) all exit 0. Dry-run sampling harness (`tests/simulate_gpu.sh`) over `/mnt/dorneMedia/Pinoy` roots: 30+ files sampled across AV1/H.264/HEVC BDRip — every re-encode decision used NVENC HEVC, zero CPU, zero libx264.
+- **Verified:** FFmpeg smoke tests (NVENC 10-bit, yadif+scale+fps filter chain, subtitle burn) all exit 0. Full-library decision sim over all 227 UC Gundam files matched the real dry-run engine 189/189 with zero mismatches; only the two Thunderbolt verdicts change with the HDR path. Dry-run sampling harness (`tests/simulate_gpu.sh`) over `/mnt/dorneMedia/Pinoy` roots: 30+ files sampled across AV1/H.264/HEVC BDRip — every re-encode decision used NVENC HEVC, zero CPU, zero libx264.
 
 ### Bash
 - **NEVER `cmd | grep -q` under `set -o pipefail`.** `grep -q` exits immediately on the first match and SIGPIPE-kills ffmpeg → pipeline reports exit 141 → `if` treats it as failure. This silently disabled NVENC detection for months. Capture `VAR=$(ffmpeg -encoders)` once and use `[[ "$VAR" == *pattern* ]]`.

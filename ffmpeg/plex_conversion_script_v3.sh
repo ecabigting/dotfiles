@@ -1,6 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
+# 2026-08-30 fix: everything lives inside main(). bash parses a function body
+# as ONE compound command, so it reads the ENTIRE file front-to-back before
+# running anything. Without this, bash parses trailing commands (the final
+# ANY_FAIL block) lazily AFTER the big hourly while-loop finishes — if the file
+# is edited/reverted in the meantime, bash reads mismatched bytes from the
+# rewritten file and dies with a spurious "syntax error near unexpected token
+# '('" once the loop ends. Wrapping forces a clean upfront parse.
+main() {
+
 for cmd in ffmpeg ffprobe jq; do
   if ! command -v "$cmd" &>/dev/null; then
     echo "!! CRITICAL ERROR: Required command '$cmd' is not installed." >&2
@@ -411,3 +420,7 @@ if (( ANY_FAIL > 0 )); then
   exit 1
 fi
 echo "--- All tasks are complete. ---"
+
+}
+
+main "$@"

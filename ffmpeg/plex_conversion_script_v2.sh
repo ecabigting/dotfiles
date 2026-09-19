@@ -15,15 +15,13 @@ for cmd in ffmpeg ffprobe jq; do
 done
 
 # --- Hardware Acceleration & Encoder Detection ---
+
 HWACCEL=""
 USE_NVENC=0
 if ffmpeg -hide_banner -encoders 2>/dev/null | grep -q h264_nvenc && nvidia-smi &>/dev/null; then
   HWACCEL="-hwaccel cuda -hwaccel_output_format cuda"
   USE_NVENC=1
   echo "--- NVIDIA NVENC GPU encoding enabled ---"
-elif ffmpeg -hide_banner -hwaccels 2>/dev/null | grep -q cuda; then
-  HWACCEL="-hwaccel cuda"
-  echo "--- NVIDIA CUDA decode enabled (CPU encode fallback) ---"
 fi
 
 # --- Input Validation: Check for exactly one directory argument ---

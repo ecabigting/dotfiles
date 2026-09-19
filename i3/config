@@ -160,18 +160,18 @@ bindsym XF86AudioMicMute exec amixer sset Capture toggle
 ## App shortcuts
 bindsym $mod+w exec --no-startup-id /usr/bin/zen-browser
 bindsym $mod+n exec --no-startup-id /usr/bin/thunar
-# bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'gimp ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f'
+bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'gimp ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f'
 
-bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'krita ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png'
+# bindsym --release Print exec --no-startup-id notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-screenshot.png" && scrot -d 2 ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png -f -e 'krita ~/Pictures/Screenshots/%Y-%m-%d-%T-screenshot.png'
 
 ## Take screenshot with `scrot` via mouse drag
 # saves the file first to `/tmp/screenshot.png`
 # moves the file to home folder with datetimestamp file name
 # open gimp that datetime filename
-# bindsym --release $mod+Shift+s exec scrot /tmp/screenshot.png -s -f && mv /tmp/screenshot.png "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" && notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-snip.png" && gimp  -f "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" 
+bindsym --release $mod+Shift+s exec scrot /tmp/screenshot.png -s -f && mv /tmp/screenshot.png "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" && notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-snip.png" && gimp  -f "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" 
 
 # open krita with the screen shot
-bindsym --release $mod+Shift+s exec scrot /tmp/screenshot.png -s -f && mv /tmp/screenshot.png "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" && notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-snip.png" && krita "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" 
+# bindsym --release $mod+Shift+s exec scrot /tmp/screenshot.png -s -f && mv /tmp/screenshot.png "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" && notify-send -i camera-photo "Screenshot saved to ~/Pictures/Screenshots/$(date +"%Y-%m-%d-%T")-snip.png" && krita "/home/stifmiester/Pictures/Screenshots/$(date +%Y-%m-%d-%T)-snip.png" 
 
 
 ## Take a Vidoo recording of a secion using
@@ -303,7 +303,7 @@ exec --no-startup-id numlockx on
 exec --no-startup-id ~/.screenlayout/monitor.sh
 
 # set wallpaper
-exec --no-startup-id sleep 1 && variety
+exec --no-startup-id waypaper --restore
 
 # set powersavings for display:
 exec --no-startup-id xset s 900 dpms 900 900 900
@@ -389,7 +389,6 @@ for_window [class="pavucontrol" instance="pavucontrol"] floating enable
 for_window [class="Yad" instance="yad"] floating enable
 for_window [class="Galculator" instance="galculator"] floating enable
 for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
-for_window [class="Variety" instance="Variety"] floating enable
 for_window [class="vlc" instance="vlc"] floating enable
 for_window [class="Viewnior" instance="viewnior"] floating enable
 for_window [class="Rustdesk" instance="rustdesk"] floating enable
