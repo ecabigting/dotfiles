@@ -17,32 +17,38 @@ for cmd in ffmpeg ffprobe jq; do
   fi
 done
 
-# --- Encoder detection (NVENC HEVC + software x265) ---
+# --- Encoder detection (NVENC H264 + software x264 + HDR filters) ---
 # 2026-08-30: capture the lists once and string-match. The old
 # `ffmpeg --encoders | grep -q` pattern always failed under set -o pipefail:
 # grep -q exits on its first match -> ffmpeg gets SIGPIPE -> the pipeline
-# reports exit 141 -> NVENC_HEVC/HAS_LIBX265 were ALWAYS 0 -> every re-encode
-# silently fell back to CPU libx264 even with an RTX 4060 + hevc_nvenc present.
-NVENC_HEVC=0
-HAS_LIBX265=0
+# reports exit 141 -> NVENC_H264/HAS_LIBX264 were ALWAYS 0 -> every re-encode
+# silently fell back to CPU even with an RTX 4060 + h264_nvenc present.
+# 2026-09-26: universal output target is H.264 8-bit (plays in every browser)
+# -> NVENC_HEVC/libx265 replaced by h264_nvenc/libx264. zscale/tonemap must be
+# present in the build for HDR->SDR tone-mapping (Task: HDR decision).
+NVENC_H264=0
+HAS_LIBX264=0
 HAS_CUDA_HWACCEL=0
+HAS_ZSCALE=0
+HAS_TONEMAP=0
 FFMPEG_BIN=$(command -v ffmpeg)
 ENCODER_LIST=$(ffmpeg -hide_banner -encoders 2>/dev/null || true)
 HWACCEL_LIST=$(ffmpeg -hide_banner -hwaccels 2>/dev/null || true)
-[[ "$ENCODER_LIST" == *hevc_nvenc* ]] && NVENC_HEVC=1
-[[ "$ENCODER_LIST" == *libx265* ]] && HAS_LIBX265=1
+FILTER_LIST=$(ffmpeg -hide_banner -filters 2>/dev/null || true)
+[[ "$ENCODER_LIST" == *h264_nvenc* ]] && NVENC_H264=1
+[[ "$ENCODER_LIST" == *libx264* ]] && HAS_LIBX264=1
 [[ "$HWACCEL_LIST" == *cuda* ]] && HAS_CUDA_HWACCEL=1
+[[ "$FILTER_LIST" =~ (^|[[:space:]])zscale([[:space:]]|$) ]] && HAS_ZSCALE=1
+[[ "$FILTER_LIST" =~ (^|[[:space:]])tonemap([[:space:]]|$) ]] && HAS_TONEMAP=1
 
 GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1 || true)
-echo "[ENCODER] ffmpeg=$FFMPEG_BIN nvidia='${GPU_NAME:-none}' hevc_nvenc=$NVENC_HEVC cuda_hwaccel=$HAS_CUDA_HWACCEL libx265=$HAS_LIBX265"
-if (( NVENC_HEVC )) && (( HAS_CUDA_HWACCEL )); then
-  echo "   -> GPU HEVC encoding selected (hevc_nvenc + cuda hwaccel): re-encodes use the NVIDIA GPU."
-elif (( NVENC_HEVC )); then
-  echo "   -> hevc_nvenc available but cuda hwaccel missing (still GPU encode; CPU decode)."
-elif (( HAS_LIBX265 )); then
-  echo "   !! WARNING: hevc_nvenc NOT available. Re-encodes will use CPU libx265 (GPU NOT used)." >&2
+echo "[ENCODER] ffmpeg=$FFMPEG_BIN nvidia='${GPU_NAME:-none}' h264_nvenc=$NVENC_H264 cuda_hwaccel=$HAS_CUDA_HWACCEL libx264=$HAS_LIBX264 zscale=$HAS_ZSCALE tonemap=$HAS_TONEMAP"
+if (( NVENC_H264 )) && (( HAS_CUDA_HWACCEL )); then
+  echo "   -> GPU H.264 encoding selected (h264_nvenc + cuda hwaccel): re-encodes use the NVIDIA GPU."
+elif (( NVENC_H264 )); then
+  echo "   -> h264_nvenc available but cuda hwaccel missing (still GPU encode; CPU decode)."
 else
-  echo "   !! WARNING: neither hevc_nvenc nor libx265 available. Re-encodes use CPU libx264 (GPU NOT used)." >&2
+  echo "   !! WARNING: h264_nvenc NOT available. Re-encodes will use CPU libx264 (GPU NOT used)." >&2
 fi
 
 if [ "${1:-}" == "--dry-run" ]; then
@@ -210,7 +216,15 @@ while IFS= read -r SOURCE_FILE; do
   CODEC=$(echo "$VIDEO_STREAM_JSON" | jq -r '.codec_name')
   WIDTH=$(echo "$VIDEO_STREAM_JSON" | jq -r '.width')
   HEIGHT=$(echo "$VIDEO_STREAM_JSON" | jq -r '.height')
-  PIX_FMT=$(echo "$VIDEO_STREAM_JSON" | jq -r '.pix_fmt // "yuv420p"')
+  PIX_FMT=$(echo "$VIDEO_STREAM_JSON" | jq -r '.pix_fmt // "unknown"')
+  COLOR_TRANSFER=$(echo "$VIDEO_STREAM_JSON" | jq -r '.color_transfer // "bt709"')
+  HDR_SOURCE=0
+  case "$COLOR_TRANSFER" in
+    smpte2084 | arib-std-b67) HDR_SOURCE=1 ;;
+  esac
+  if [[ "$PIX_FMT" == *10le* ]] && (( ! HDR_SOURCE )); then
+    echo "   [WARN]: 10-bit source tagged as SDR (${COLOR_TRANSFER}) — no tone-map applied, will dark-crush highlights." >&2
+  fi
   FPS_NUM=$(echo "$VIDEO_STREAM_JSON" | jq -r '.avg_frame_rate // "0/1" | split("/")[0]')
   FPS_DEN=$(echo "$VIDEO_STREAM_JSON" | jq -r '.avg_frame_rate // "0/1" | split("/")[1]')
   FPS_DEC=$(awk -v n="$FPS_NUM" -v d="$FPS_DEN" 'BEGIN{ print (d > 0) ? n / d : 0 }')
@@ -218,34 +232,21 @@ while IFS= read -r SOURCE_FILE; do
 
   # NOTE: BURN_FILTER is set by the subtitle section (#2 above) BEFORE this block.
 
-  # ---- 3. Video decision ----
-  # Proven copy ceiling: h264/yuv420p OR hevc/yuv420p|yuv420p10le, <=1920x1088,
-  # <=30fps, no burn, AND progressive. Anything else -> re-encode.
-  # 2026-08-30: re-encodes ALWAYS prefer hevc_nvenc (GPU). With a filter chain
-  # (deinterlace/resize/fps/burn) NVENC runs WITHOUT -hwaccel cuda: filters run
-  # on CPU frames, the encode still happens on the GPU. CPU libx265 is a failsafe.
+  # ---- 3. Video decision (2026-09-26: universal H.264 target) ----
+  # Universal playback floor = H.264 8-bit yuv420p (+AAC +SRT): plays natively
+  # in EVERY browser (Firefox/Chromium/Safari) and TV. HEVC/AV1/10-bit/HDR all
+  # re-encode to 8-bit H.264. Copy-eligible ONLY: h264 + yuv420p + <=1920x1088
+  # + <=30fps + progressive + SDR. h264_nvenc is 8-bit only: 10-bit sources
+  # MUST leave the GPU on the system-memory path (see re-encode block below).
   VIDEO_FILTERS=""
   VIDEO_OPTS=()
   HWACCEL=""
-  # 2026-08-30 fix: NVENC_OPTS no longer forces -pix_fmt. When frames are
-  # delivered as CUDA hw frames (via -hwaccel_output_format cuda) a forced
-  # -pix_fmt yuv420p10le inserts auto_scale, which cannot accept the `cuda`
-  # pix fmt -> "Impossible to convert between the formats supported by the
-  # filter 'Parsed_null_0' and the filter 'auto_scale_0'" on any GPU-decoded
-  # 10-bit source (AV1/HEVC). The pure-GPU path now feeds NVENC the decoder's
-  # native frames (output bit depth follows the source). The filter-chain path
-  # re-adds -pix_fmt because it decodes to system memory (see below).
-  NVENC_OPTS=(-c:v hevc_nvenc -preset p7 -tune hq -cq 27 -rc vbr -multipass 1 -b_ref_mode middle -bf 4 -spatial-aq 1 -temporal-aq 1 -rc-lookahead 32)
+  NVENC_H264_OPTS=(-c:v h264_nvenc -preset p7 -tune hq -cq 23 -rc vbr -multipass 1 -b_ref_mode middle -bf 4 -spatial-aq 1 -temporal-aq 1 -rc-lookahead 32 -profile:v high)
   SAFE_VIDEO=0
   case "$CODEC" in
     h264)
-      if [ "$PIX_FMT" == "yuv420p" ] && (( WIDTH <= 1920 )) && (( HEIGHT <= 1088 )) && (( FPS_INT <= 30 )); then
-        SAFE_VIDEO=1
-      fi
-      ;;
-    hevc)
-      if { [ "$PIX_FMT" == "yuv420p" ] || [ "$PIX_FMT" == "yuv420p10le" ]; } \
-            && (( WIDTH <= 1920 )) && (( HEIGHT <= 1088 )) && (( FPS_INT <= 30 )); then
+      if [ "$PIX_FMT" == "yuv420p" ] && (( WIDTH <= 1920 )) && (( HEIGHT <= 1088 )) && (( FPS_INT <= 30 )) \
+           && (( ! HDR_SOURCE )); then
         SAFE_VIDEO=1
       fi
       ;;
@@ -280,29 +281,51 @@ while IFS= read -r SOURCE_FILE; do
       VIDEO_FILTERS+="$BURN_FILTER"
     fi
 
-    if (( NVENC_HEVC )); then
-      if [ -n "$VIDEO_FILTERS" ]; then
-        echo "   [VIDEO]: Re-encoding via NVENC HEVC (filter chain: $VIDEO_FILTERS)."
-        VIDEO_OPTS=("${NVENC_OPTS[@]}" -pix_fmt yuv420p10le -vf "$VIDEO_FILTERS")
+    # 2026-09-26: HDR sources are NEVER copy-eligible and are tone-mapped to
+    # SDR bt709 so the 8-bit H.264 output is correct AND universal (browsers
+    # can't MSE-play HDR anyway). Requires zscale+tonemap in the ffmpeg build;
+    # missing filters -> hard skip (never emit dark HDR pass-through).
+    if (( HDR_SOURCE )); then
+      if (( ! HAS_ZSCALE )) || (( ! HAS_TONEMAP )); then
+        echo "   !! [SANITY-FAIL] HDR source (${COLOR_TRANSFER}) but zscale/tonemap filters missing in this ffmpeg build; cannot produce watchable SDR." >&2
+        ANY_FAIL=$((ANY_FAIL + 1))
+        continue
+      fi
+      echo "   [VIDEO]: HDR source (${COLOR_TRANSFER}) — tone-mapping to SDR bt709."
+      if [ -n "$VIDEO_FILTERS" ]; then VIDEO_FILTERS+=","; fi
+      VIDEO_FILTERS+="zscale=t=linear:npl=100,format=gbrpf32le,tonemap=hable:desat=0,zscale=primaries=bt709:transfer=bt709:m=bt709:r=tv,format=yuv420p"
+    fi
+
+    if (( NVENC_H264 )); then
+      # 10-bit/HDR/filter sources MUST leave the GPU to down-convert to 8-bit
+      # (Ada h264_nvenc cannot take 10-bit frames). NVENC still encodes on GPU.
+      # The system-memory path is the ONLY place a forced -pix_fmt is safe
+      # (CUDA-frames path cannot take it); it also normalizes 4:2:2/4:4:4
+      # sources that h264_nvenc rejects/silently degrades to a non-universal
+      # profile.
+      if [ -n "$VIDEO_FILTERS" ] || [ "$PIX_FMT" != "yuv420p" ] || (( HDR_SOURCE )); then
+        echo "   [VIDEO]: Re-encoding via NVENC H.264 (system-memory path, 8-bit yuv420p)."
+        if [ -n "$VIDEO_FILTERS" ]; then
+          VIDEO_OPTS=("${NVENC_H264_OPTS[@]}" -pix_fmt yuv420p -vf "$VIDEO_FILTERS")
+        else
+          VIDEO_OPTS=("${NVENC_H264_OPTS[@]}" -pix_fmt yuv420p -vf "format=yuv420p")
+        fi
       else
-        echo "   [VIDEO]: Re-encoding via NVENC HEVC (GPU decode+encode, no filter chain)."
+        echo "   [VIDEO]: Re-encoding via NVENC H.264 (GPU decode+encode, no filter chain)."
         HWACCEL="-hwaccel cuda -hwaccel_output_format cuda"
-        VIDEO_OPTS=("${NVENC_OPTS[@]}")
+        VIDEO_OPTS=("${NVENC_H264_OPTS[@]}")
       fi
-    elif (( HAS_LIBX265 )); then
-      echo "   !! WARNING: hevc_nvenc unavailable — re-encoding via CPU libx265 (GPU NOT used)." >&2
-      if [ -n "$VIDEO_FILTERS" ]; then
-        VIDEO_OPTS=(-c:v libx265 -preset medium -crf 22 -pix_fmt yuv420p10le -vf "$VIDEO_FILTERS")
-      else
-        VIDEO_OPTS=(-c:v libx265 -preset medium -crf 22 -pix_fmt yuv420p10le)
-      fi
-    else
-      echo "   !! WARNING: neither hevc_nvenc nor libx265 — re-encoding via CPU libx264 (GPU NOT used)." >&2
+    elif (( HAS_LIBX264 )); then
+      echo "   !! WARNING: h264_nvenc unavailable — re-encoding via CPU libx264 (GPU NOT used)." >&2
       if [ -n "$VIDEO_FILTERS" ]; then
         VIDEO_OPTS=(-c:v libx264 -preset medium -crf 19 -pix_fmt yuv420p -vf "$VIDEO_FILTERS")
       else
         VIDEO_OPTS=(-c:v libx264 -preset medium -crf 19 -pix_fmt yuv420p)
       fi
+    else
+      echo "   !! WARNING: no H.264 encoder available. Skipping re-encode." >&2
+      ANY_FAIL=$((ANY_FAIL + 1))
+      continue
     fi
   fi
 
@@ -373,6 +396,9 @@ while IFS= read -r SOURCE_FILE; do
   COMMAND+=("${VIDEO_OPTS[@]}")
   if [ -n "$AUDIO_MAPS" ]; then COMMAND+=($AUDIO_MAPS $AUDIO_CODEC_OPTS $AUDIO_METADATA_OPTS); fi
   if [ -n "$SUB_MAP_OPTS" ]; then COMMAND+=($SUB_MAP_OPTS); fi
+  if (( HDR_SOURCE )); then
+    COMMAND+=(-colorspace bt709 -color_trc bt709 -color_primaries bt709 -color_range tv)
+  fi
   COMMAND+=(-map_chapters 0 -map_metadata 0 -y "$OUTPUT_FILE_MKV")
 
   echo "   Executing: ${COMMAND[*]}"
@@ -389,11 +415,11 @@ while IFS= read -r SOURCE_FILE; do
         rm -f "$OUTPUT_FILE_MKV"
       elif [ "$OUT_CODEC" == "$CODEC" ] && (( COPIES_VIDEO )); then
         echo "   [VERIFY]: output video copied as $CODEC. OK."
-      elif [ "$OUT_CODEC" == "hevc" ]; then
-        echo "   [VERIFY]: output video re-encoded to HEVC. OK."
+      elif [ "$OUT_CODEC" == "h264" ]; then
+        echo "   [VERIFY]: output video re-encoded to H.264. OK."
       else
         ANY_FAIL=$((ANY_FAIL + 1))
-        echo "   !! VERIFY ERROR: expected output codec $CODEC (copy) or hevc (re-encode) but got '$OUT_CODEC'. Removing." >&2
+        echo "   !! VERIFY ERROR: expected output codec $CODEC (copy) or h264 (re-encode) but got '$OUT_CODEC'. Removing." >&2
         rm -f "$OUTPUT_FILE_MKV"
       fi
     else

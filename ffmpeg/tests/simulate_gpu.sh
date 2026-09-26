@@ -36,18 +36,23 @@ bash "$V3" --dry-run "$SAMPLE" > "$WORK/run.log" 2>&1
 
 # 1. startup encoder matrix + GPU selection
 grep -q '\[ENCODER\]' "$WORK/run.log" && ok "startup encoder matrix printed" || fail "missing [ENCODER] line"
-grep -q 'GPU HEVC encoding selected' "$WORK/run.log" && ok "GPU HEVC selected" || fail "GPU HEVC NOT selected (see log)"
+grep -q 'GPU H.264 encoding selected' "$WORK/run.log" && ok "GPU H.264 selected" || fail "GPU H.264 NOT selected (see log)"
 
-# 2. every re-encode decision must be NVENC HEVC (GPU); zero CPU fallbacks
+# 2. every re-encode decision must be NVENC H.264 (GPU); zero CPU fallbacks
 REENC=$(grep -c 'Needs re-encode' "$WORK/run.log" || true)
-NVENC=$(grep -c 'Re-encoding via NVENC HEVC' "$WORK/run.log" || true)
-CPU=$(grep -c 'CPU libx' "$WORK/run.log" || true)
-grep -q 'hevc_nvenc' "$WORK/run.log" && ok "assembled commands reference hevc_nvenc" || fail "no hevc_nvenc in any command"
+NVENC=$(grep -c 'Re-encoding via NVENC H.264' "$WORK/run.log" || true)
+CPU=$(grep -c 'CPU libx264' "$WORK/run.log" || true)
+if [ "$REENC" -eq 0 ]; then
+  fail "no re-encode decisions in the sample; the GPU checks are vacuous (grow the sample or point at another root)"
+else
+  ok "sample produced $REENC re-encode decision(s)"
+fi
+grep -q 'h264_nvenc' "$WORK/run.log" && ok "assembled commands reference h264_nvenc" || fail "no h264_nvenc in any command"
 if [ "$NVENC" -eq "$REENC" ]; then ok "GPU used for $NVENC/$REENC re-encode decisions"; else fail "GPU used for $NVENC/$REENC re-encode decisions"; fi
 [ "$CPU" -eq 0 ] && ok "zero CPU re-encode decisions" || fail "$CPU CPU re-encode decision(s) (warnings require failsafe path)"
 
 # 3. no libx264 fallback in any decision
-if grep -q 'Re-encoding via CPU libx264' "$WORK/run.log"; then
+if grep -q 'h264_nvenc unavailable' "$WORK/run.log"; then
   fail "libx264 fallback used in a decision (see log)"
 else
   ok "no libx264 decision"
