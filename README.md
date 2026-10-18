@@ -527,12 +527,15 @@ Inside Neovim run this command `:checkhealth` and scroll down to the `clipboard`
 For arch linux, easier to install `xclip` with `pacman -S xclip` then set the clipboard default in your `~/.config/nvim/init.lua` by adding this line `vim.opt.clipboard = "unnamedplus"`
 
 ### yt-dlp
+
 Install for windows via [winutil](https://github.com/ChrisTitusTech/winutil)
 
 Install for Arch via pacman:
+
 ```zsh
 sudo pacmang -S yt-dlp
 ```
+
 For config copy the `yt-dlp` folder to the following location:
 
 For windows:
@@ -541,21 +544,16 @@ For windows:
 For Arch:
 `.config/`
 
-
 ## Mongodb Compass fails to access keyring on i3wm
-update the file in 
+
+update the file in
 
 ```bash
 /usr/share/application/mongodb-compass.desktop
 ```
 
 update the `exec` line to:
+
 ```bash
-Exec=env XDG_CURRENT_DESKTOP=GNOME mongodb-compass %U
+Exec=env MONGODB_COMPASS_TEST_LOG_DIR=/dev/null XDG_CURRENT_DESKTOP=GNOME mongodb-compass --gtk-version=3 --ignore-additional-command-line-flags %U
 ```
-
-
-
-
-
-
