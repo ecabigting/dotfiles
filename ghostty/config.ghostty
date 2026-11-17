@@ -9,9 +9,14 @@ background-opacity = 0.88
 
 # font family
 font-family = "MesloLGL Nerd Font Mono"
-
+font-family-italic = "VictorMono Nerd Font Mono"
+font-family-bold-italic = "VictorMono Nerd Font Mono"
+font-style-bold-italic = "Bold Italic"
 # Optional: adds blur to the transparent background
 # background-blur-radius = 20e
 
 # theme:
 theme = TokyoNight Storm
+
+# Disables the "Are you sure you want to close?" prompt
+confirm-close-surface = false
